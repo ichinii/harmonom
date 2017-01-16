@@ -1,0 +1,1917 @@
+   1               		.file	"ButtonPadControllerSPI_v15.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               	.global	__vector_3
+  12               	__vector_3:
+  13               	.LFB4:
+  14               		.file 1 "ButtonPadControllerSPI_v15.c"
+   1:ButtonPadControllerSPI_v15.c **** /********************************************************************************
+   2:ButtonPadControllerSPI_v15.c **** 					Button Pad Controller SPI Code
+   3:ButtonPadControllerSPI_v15.c **** 					  Sparfun Electronics
+   4:ButtonPadControllerSPI_v15.c **** 					 Written by Ryan Owens
+   5:ButtonPadControllerSPI_v15.c **** *********************************************************************************
+   6:ButtonPadControllerSPI_v15.c **** */
+   7:ButtonPadControllerSPI_v15.c **** 
+   8:ButtonPadControllerSPI_v15.c **** //***************************************
+   9:ButtonPadControllerSPI_v15.c **** //			Include Libraries
+  10:ButtonPadControllerSPI_v15.c **** //***************************************
+  11:ButtonPadControllerSPI_v15.c **** #include <inttypes.h>
+  12:ButtonPadControllerSPI_v15.c **** #include <avr/io.h>
+  13:ButtonPadControllerSPI_v15.c **** #include <avr/interrupt.h>
+  14:ButtonPadControllerSPI_v15.c **** #include <stdlib.h>
+  15:ButtonPadControllerSPI_v15.c **** #include "OCTOPLODODON_SLAVE.h"
+  16:ButtonPadControllerSPI_v15.c **** 
+  17:ButtonPadControllerSPI_v15.c **** //***************************************
+  18:ButtonPadControllerSPI_v15.c **** //			Global Variables
+  19:ButtonPadControllerSPI_v15.c **** //***************************************
+  20:ButtonPadControllerSPI_v15.c **** volatile uint8_t row=0;
+  21:ButtonPadControllerSPI_v15.c **** volatile int frame_num=0, incoming_board_index=0, boards_received=0, outgoing_board_index=0;
+  22:ButtonPadControllerSPI_v15.c **** volatile int board_complete=0, bit_count_input=0, bit_count_output=0;
+  23:ButtonPadControllerSPI_v15.c **** 
+  24:ButtonPadControllerSPI_v15.c **** volatile int enter_command_mode=0;
+  25:ButtonPadControllerSPI_v15.c **** char command_id, command_byte;
+  26:ButtonPadControllerSPI_v15.c **** unsigned char NUMBER_OF_BOARDS=1;
+  27:ButtonPadControllerSPI_v15.c **** 
+  28:ButtonPadControllerSPI_v15.c **** //redf, bluef and greenf are the display buffers.  These arrays contain the color value for the cor
+  29:ButtonPadControllerSPI_v15.c **** unsigned char redf[NUMBER_OF_LEDS];
+  30:ButtonPadControllerSPI_v15.c **** unsigned char bluef[NUMBER_OF_LEDS];
+  31:ButtonPadControllerSPI_v15.c **** unsigned char greenf[NUMBER_OF_LEDS];
+  32:ButtonPadControllerSPI_v15.c **** //The buttons array contains the current button values of the board
+  33:ButtonPadControllerSPI_v15.c **** unsigned char buttons[NUMBER_OF_LEDS];
+  34:ButtonPadControllerSPI_v15.c **** 
+  35:ButtonPadControllerSPI_v15.c **** //OUtoing Board contains the data to be sent to the next Slave Board
+  36:ButtonPadControllerSPI_v15.c **** //outgoing_board[NUMBER_OF_LEDS*4] -> redf[NUMBER_OF_LEDS] + greenf[NUMBER_OF_LEDS] + bluef[NUMBER_
+  37:ButtonPadControllerSPI_v15.c **** //So the current boards button values go with the next boards color values
+  38:ButtonPadControllerSPI_v15.c **** unsigned char outgoing_board[NUMBER_OF_LEDS*4];
+  39:ButtonPadControllerSPI_v15.c **** 
+  40:ButtonPadControllerSPI_v15.c **** //Data received on the SPI_IN line go into the incoming_board buffer. After receiving values for al
+  41:ButtonPadControllerSPI_v15.c **** //the display frames (redf, greenf, bluef) or the outgoing_board buffer depending on how many board
+  42:ButtonPadControllerSPI_v15.c **** unsigned char incoming_board[NUMBER_OF_LEDS*4];
+  43:ButtonPadControllerSPI_v15.c **** 
+  44:ButtonPadControllerSPI_v15.c **** 
+  45:ButtonPadControllerSPI_v15.c **** ISR (PCINT0_vect)
+  46:ButtonPadControllerSPI_v15.c **** {
+  15               		.loc 1 46 0
+  16               		.cfi_startproc
+  17 0000 1F92      		push r1
+  18               	.LCFI0:
+  19               		.cfi_def_cfa_offset 3
+  20               		.cfi_offset 1, -2
+  21 0002 0F92      		push r0
+  22               	.LCFI1:
+  23               		.cfi_def_cfa_offset 4
+  24               		.cfi_offset 0, -3
+  25 0004 0FB6      		in r0,__SREG__
+  26 0006 0F92      		push r0
+  27 0008 1124      		clr __zero_reg__
+  28 000a 2F93      		push r18
+  29               	.LCFI2:
+  30               		.cfi_def_cfa_offset 5
+  31               		.cfi_offset 18, -4
+  32 000c 3F93      		push r19
+  33               	.LCFI3:
+  34               		.cfi_def_cfa_offset 6
+  35               		.cfi_offset 19, -5
+  36 000e 4F93      		push r20
+  37               	.LCFI4:
+  38               		.cfi_def_cfa_offset 7
+  39               		.cfi_offset 20, -6
+  40 0010 5F93      		push r21
+  41               	.LCFI5:
+  42               		.cfi_def_cfa_offset 8
+  43               		.cfi_offset 21, -7
+  44 0012 8F93      		push r24
+  45               	.LCFI6:
+  46               		.cfi_def_cfa_offset 9
+  47               		.cfi_offset 24, -8
+  48 0014 9F93      		push r25
+  49               	.LCFI7:
+  50               		.cfi_def_cfa_offset 10
+  51               		.cfi_offset 25, -9
+  52 0016 EF93      		push r30
+  53               	.LCFI8:
+  54               		.cfi_def_cfa_offset 11
+  55               		.cfi_offset 30, -10
+  56 0018 FF93      		push r31
+  57               	.LCFI9:
+  58               		.cfi_def_cfa_offset 12
+  59               		.cfi_offset 31, -11
+  60               	/* prologue: Signal */
+  61               	/* frame size = 0 */
+  62               	/* stack size = 11 */
+  63               	.L__stack_usage = 11
+  47:ButtonPadControllerSPI_v15.c **** 	
+  48:ButtonPadControllerSPI_v15.c **** 	cli();
+  64               		.loc 1 48 0
+  65               	/* #APP */
+  66               	 ;  48 "ButtonPadControllerSPI_v15.c" 1
+  67 001a F894      		cli
+  68               	 ;  0 "" 2
+  49:ButtonPadControllerSPI_v15.c **** 
+  50:ButtonPadControllerSPI_v15.c **** 	if(PINB & (1<<SPI_SCLK)){
+  69               		.loc 1 50 0
+  70               	/* #NOAPP */
+  71 001c 1D9B      		sbis 0x3,5
+  72 001e 00C0      		rjmp .L2
+  51:ButtonPadControllerSPI_v15.c **** 		//Make sure that the Chip Select line is high.
+  52:ButtonPadControllerSPI_v15.c **** 		if(PINB & (1<<SPI_CS)){
+  73               		.loc 1 52 0
+  74 0020 1A9B      		sbis 0x3,2
+  75 0022 00C0      		rjmp .L3
+  53:ButtonPadControllerSPI_v15.c **** 			enter_command_mode=0;
+  76               		.loc 1 53 0
+  77 0024 1092 0000 		sts enter_command_mode+1,__zero_reg__
+  78 0028 1092 0000 		sts enter_command_mode,__zero_reg__
+  54:ButtonPadControllerSPI_v15.c **** 			//If the clock is high than there is valid data. Put the incoming bit into the color frame
+  55:ButtonPadControllerSPI_v15.c **** 			if(PINB & (1<<SPI_IN))incoming_board[incoming_board_index]|=(1<<bit_count_input++);	//If the rec
+  79               		.loc 1 55 0
+  80 002c 1C9B      		sbis 0x3,4
+  81 002e 00C0      		rjmp .L4
+  82               		.loc 1 55 0 is_stmt 0 discriminator 1
+  83 0030 2091 0000 		lds r18,bit_count_input
+  84 0034 3091 0000 		lds r19,bit_count_input+1
+  85 0038 C901      		movw r24,r18
+  86 003a 0196      		adiw r24,1
+  87 003c 9093 0000 		sts bit_count_input+1,r25
+  88 0040 8093 0000 		sts bit_count_input,r24
+  89 0044 E091 0000 		lds r30,incoming_board_index
+  90 0048 F091 0000 		lds r31,incoming_board_index+1
+  91 004c E050      		subi r30,lo8(-(incoming_board))
+  92 004e F040      		sbci r31,hi8(-(incoming_board))
+  93 0050 81E0      		ldi r24,lo8(1)
+  94 0052 90E0      		ldi r25,0
+  95 0054 00C0      		rjmp 2f
+  96               		1:
+  97 0056 880F      		lsl r24
+  98               		2:
+  99 0058 2A95      		dec r18
+ 100 005a 02F4      		brpl 1b
+ 101 005c 9081      		ld r25,Z
+ 102 005e 892B      		or r24,r25
+ 103 0060 00C0      		rjmp .L14
+ 104               	.L4:
+  56:ButtonPadControllerSPI_v15.c **** 			else incoming_board[incoming_board_index]&=~(1<<bit_count_input++);			
+ 105               		.loc 1 56 0 is_stmt 1
+ 106 0062 2091 0000 		lds r18,bit_count_input
+ 107 0066 3091 0000 		lds r19,bit_count_input+1
+ 108 006a C901      		movw r24,r18
+ 109 006c 0196      		adiw r24,1
+ 110 006e 9093 0000 		sts bit_count_input+1,r25
+ 111 0072 8093 0000 		sts bit_count_input,r24
+ 112 0076 E091 0000 		lds r30,incoming_board_index
+ 113 007a F091 0000 		lds r31,incoming_board_index+1
+ 114 007e E050      		subi r30,lo8(-(incoming_board))
+ 115 0080 F040      		sbci r31,hi8(-(incoming_board))
+ 116 0082 81E0      		ldi r24,lo8(1)
+ 117 0084 90E0      		ldi r25,0
+ 118 0086 00C0      		rjmp 2f
+ 119               		1:
+ 120 0088 880F      		lsl r24
+ 121 008a 991F      		rol r25
+ 122               		2:
+ 123 008c 2A95      		dec r18
+ 124 008e 02F4      		brpl 1b
+ 125 0090 8095      		com r24
+ 126 0092 9095      		com r25
+ 127 0094 9081      		ld r25,Z
+ 128 0096 8923      		and r24,r25
+ 129               	.L14:
+ 130 0098 8083      		st Z,r24
+  57:ButtonPadControllerSPI_v15.c **** 			
+  58:ButtonPadControllerSPI_v15.c **** 			if(bit_count_input >= COLOR_BITS){
+ 131               		.loc 1 58 0
+ 132 009a 8091 0000 		lds r24,bit_count_input
+ 133 009e 9091 0000 		lds r25,bit_count_input+1
+ 134 00a2 0897      		sbiw r24,8
+ 135 00a4 04F4      		brge .+2
+ 136 00a6 00C0      		rjmp .L7
+  59:ButtonPadControllerSPI_v15.c **** 				bit_count_input=0;
+ 137               		.loc 1 59 0
+ 138 00a8 1092 0000 		sts bit_count_input+1,__zero_reg__
+ 139 00ac 1092 0000 		sts bit_count_input,__zero_reg__
+  60:ButtonPadControllerSPI_v15.c **** 				incoming_board_index+=1;
+ 140               		.loc 1 60 0
+ 141 00b0 8091 0000 		lds r24,incoming_board_index
+ 142 00b4 9091 0000 		lds r25,incoming_board_index+1
+ 143 00b8 0196      		adiw r24,1
+ 144 00ba 9093 0000 		sts incoming_board_index+1,r25
+ 145 00be 8093 0000 		sts incoming_board_index,r24
+ 146 00c2 00C0      		rjmp .L7
+ 147               	.L3:
+  61:ButtonPadControllerSPI_v15.c **** 			}
+  62:ButtonPadControllerSPI_v15.c **** 		}
+  63:ButtonPadControllerSPI_v15.c **** 		//If the chip select line is low and the data line is high, we may be trying to get into "Command
+  64:ButtonPadControllerSPI_v15.c **** 		else enter_command_mode=1;
+ 148               		.loc 1 64 0
+ 149 00c4 81E0      		ldi r24,lo8(1)
+ 150 00c6 90E0      		ldi r25,0
+ 151 00c8 00C0      		rjmp .L15
+ 152               	.L2:
+  65:ButtonPadControllerSPI_v15.c **** 	}
+  66:ButtonPadControllerSPI_v15.c **** 	else{
+  67:ButtonPadControllerSPI_v15.c **** 		if(PINB & (1<<SPI_CS)){
+ 153               		.loc 1 67 0
+ 154 00ca 1A9B      		sbis 0x3,2
+ 155 00cc 00C0      		rjmp .L8
+  68:ButtonPadControllerSPI_v15.c **** 			enter_command_mode=0;
+ 156               		.loc 1 68 0
+ 157 00ce 1092 0000 		sts enter_command_mode+1,__zero_reg__
+ 158 00d2 1092 0000 		sts enter_command_mode,__zero_reg__
+  69:ButtonPadControllerSPI_v15.c **** 			//If the clock is low, than we can send data to the next board.
+  70:ButtonPadControllerSPI_v15.c **** 			if((outgoing_board[outgoing_board_index]>>bit_count_output++)&0x01)sbi(PORTB, SPI_OUT);
+ 159               		.loc 1 70 0
+ 160 00d6 E091 0000 		lds r30,outgoing_board_index
+ 161 00da F091 0000 		lds r31,outgoing_board_index+1
+ 162 00de E050      		subi r30,lo8(-(outgoing_board))
+ 163 00e0 F040      		sbci r31,hi8(-(outgoing_board))
+ 164 00e2 8081      		ld r24,Z
+ 165 00e4 90E0      		ldi r25,0
+ 166 00e6 2091 0000 		lds r18,bit_count_output
+ 167 00ea 3091 0000 		lds r19,bit_count_output+1
+ 168 00ee A901      		movw r20,r18
+ 169 00f0 4F5F      		subi r20,-1
+ 170 00f2 5F4F      		sbci r21,-1
+ 171 00f4 5093 0000 		sts bit_count_output+1,r21
+ 172 00f8 4093 0000 		sts bit_count_output,r20
+ 173 00fc 00C0      		rjmp 2f
+ 174               		1:
+ 175 00fe 9595      		asr r25
+ 176 0100 8795      		ror r24
+ 177               		2:
+ 178 0102 2A95      		dec r18
+ 179 0104 02F4      		brpl 1b
+ 180 0106 80FF      		sbrs r24,0
+ 181 0108 00C0      		rjmp .L9
+ 182               		.loc 1 70 0 is_stmt 0 discriminator 1
+ 183 010a 2B9A      		sbi 0x5,3
+ 184 010c 00C0      		rjmp .L10
+ 185               	.L9:
+  71:ButtonPadControllerSPI_v15.c **** 			else cbi(PORTB, SPI_OUT);
+ 186               		.loc 1 71 0 is_stmt 1
+ 187 010e 2B98      		cbi 0x5,3
+ 188               	.L10:
+  72:ButtonPadControllerSPI_v15.c **** 			
+  73:ButtonPadControllerSPI_v15.c **** 			if(bit_count_output >= COLOR_BITS){
+ 189               		.loc 1 73 0
+ 190 0110 8091 0000 		lds r24,bit_count_output
+ 191 0114 9091 0000 		lds r25,bit_count_output+1
+ 192 0118 0897      		sbiw r24,8
+ 193 011a 04F0      		brlt .L7
+  74:ButtonPadControllerSPI_v15.c **** 				bit_count_output=0;
+ 194               		.loc 1 74 0
+ 195 011c 1092 0000 		sts bit_count_output+1,__zero_reg__
+ 196 0120 1092 0000 		sts bit_count_output,__zero_reg__
+  75:ButtonPadControllerSPI_v15.c **** 				outgoing_board_index+=1;
+ 197               		.loc 1 75 0
+ 198 0124 8091 0000 		lds r24,outgoing_board_index
+ 199 0128 9091 0000 		lds r25,outgoing_board_index+1
+ 200 012c 0196      		adiw r24,1
+ 201 012e 9093 0000 		sts outgoing_board_index+1,r25
+ 202 0132 8093 0000 		sts outgoing_board_index,r24
+ 203 0136 00C0      		rjmp .L7
+ 204               	.L8:
+  76:ButtonPadControllerSPI_v15.c **** 			}
+  77:ButtonPadControllerSPI_v15.c **** 		}
+  78:ButtonPadControllerSPI_v15.c **** 		//Might be time to enter command mode!
+  79:ButtonPadControllerSPI_v15.c **** 		else{
+  80:ButtonPadControllerSPI_v15.c **** 			if(enter_command_mode==1)enter_command_mode=2;
+ 205               		.loc 1 80 0
+ 206 0138 8091 0000 		lds r24,enter_command_mode
+ 207 013c 9091 0000 		lds r25,enter_command_mode+1
+ 208 0140 0197      		sbiw r24,1
+ 209 0142 01F4      		brne .L12
+ 210               		.loc 1 80 0 is_stmt 0 discriminator 1
+ 211 0144 82E0      		ldi r24,lo8(2)
+ 212 0146 90E0      		ldi r25,0
+ 213               	.L15:
+ 214 0148 9093 0000 		sts enter_command_mode+1,r25
+ 215 014c 8093 0000 		sts enter_command_mode,r24
+ 216 0150 00C0      		rjmp .L7
+ 217               	.L12:
+  81:ButtonPadControllerSPI_v15.c **** 			else enter_command_mode=0;
+ 218               		.loc 1 81 0 is_stmt 1
+ 219 0152 1092 0000 		sts enter_command_mode+1,__zero_reg__
+ 220 0156 1092 0000 		sts enter_command_mode,__zero_reg__
+ 221               	.L7:
+  82:ButtonPadControllerSPI_v15.c **** 		}
+  83:ButtonPadControllerSPI_v15.c **** 	}
+  84:ButtonPadControllerSPI_v15.c **** 	
+  85:ButtonPadControllerSPI_v15.c **** 	//Check to see if we've received a whole board of data
+  86:ButtonPadControllerSPI_v15.c **** 	if(incoming_board_index >= (NUMBER_OF_LEDS*4)){
+ 222               		.loc 1 86 0
+ 223 015a 8091 0000 		lds r24,incoming_board_index
+ 224 015e 9091 0000 		lds r25,incoming_board_index+1
+ 225 0162 8034      		cpi r24,64
+ 226 0164 9105      		cpc r25,__zero_reg__
+ 227 0166 04F0      		brlt .L13
+  87:ButtonPadControllerSPI_v15.c **** 		incoming_board_index=0;
+ 228               		.loc 1 87 0
+ 229 0168 1092 0000 		sts incoming_board_index+1,__zero_reg__
+ 230 016c 1092 0000 		sts incoming_board_index,__zero_reg__
+  88:ButtonPadControllerSPI_v15.c **** 		outgoing_board_index=0;
+ 231               		.loc 1 88 0
+ 232 0170 1092 0000 		sts outgoing_board_index+1,__zero_reg__
+ 233 0174 1092 0000 		sts outgoing_board_index,__zero_reg__
+  89:ButtonPadControllerSPI_v15.c **** 		board_complete=1;
+ 234               		.loc 1 89 0
+ 235 0178 81E0      		ldi r24,lo8(1)
+ 236 017a 90E0      		ldi r25,0
+ 237 017c 9093 0000 		sts board_complete+1,r25
+ 238 0180 8093 0000 		sts board_complete,r24
+ 239               	.L13:
+  90:ButtonPadControllerSPI_v15.c **** 	}
+  91:ButtonPadControllerSPI_v15.c **** 	
+  92:ButtonPadControllerSPI_v15.c **** 	sei();
+ 240               		.loc 1 92 0
+ 241               	/* #APP */
+ 242               	 ;  92 "ButtonPadControllerSPI_v15.c" 1
+ 243 0184 7894      		sei
+ 244               	 ;  0 "" 2
+ 245               	/* epilogue start */
+  93:ButtonPadControllerSPI_v15.c **** }
+ 246               		.loc 1 93 0
+ 247               	/* #NOAPP */
+ 248 0186 FF91      		pop r31
+ 249 0188 EF91      		pop r30
+ 250 018a 9F91      		pop r25
+ 251 018c 8F91      		pop r24
+ 252 018e 5F91      		pop r21
+ 253 0190 4F91      		pop r20
+ 254 0192 3F91      		pop r19
+ 255 0194 2F91      		pop r18
+ 256 0196 0F90      		pop r0
+ 257 0198 0FBE      		out __SREG__,r0
+ 258 019a 0F90      		pop r0
+ 259 019c 1F90      		pop r1
+ 260 019e 1895      		reti
+ 261               		.cfi_endproc
+ 262               	.LFE4:
+ 264               	.global	fill16
+ 266               	fill16:
+ 267               	.LFB6:
+  94:ButtonPadControllerSPI_v15.c **** 
+  95:ButtonPadControllerSPI_v15.c **** int main (void)
+  96:ButtonPadControllerSPI_v15.c **** {
+  97:ButtonPadControllerSPI_v15.c **** 	int count=0;
+  98:ButtonPadControllerSPI_v15.c **** 
+  99:ButtonPadControllerSPI_v15.c **** 	ioinit (); //Boot up defaults
+ 100:ButtonPadControllerSPI_v15.c **** 	
+ 101:ButtonPadControllerSPI_v15.c **** 	//Startup Sequence
+ 102:ButtonPadControllerSPI_v15.c **** 	fill16(redf, 0xff);
+ 103:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0x00);
+ 104:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0x00);
+ 105:ButtonPadControllerSPI_v15.c **** 	while(count<3000){
+ 106:ButtonPadControllerSPI_v15.c **** 		display();
+ 107:ButtonPadControllerSPI_v15.c **** 		count++;
+ 108:ButtonPadControllerSPI_v15.c **** 	}
+ 109:ButtonPadControllerSPI_v15.c **** 	count=0;
+ 110:ButtonPadControllerSPI_v15.c **** 	fill16(redf, 0x00);
+ 111:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0xff);
+ 112:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0x00);
+ 113:ButtonPadControllerSPI_v15.c **** 	while(count<3000){
+ 114:ButtonPadControllerSPI_v15.c **** 		display();
+ 115:ButtonPadControllerSPI_v15.c **** 		count++;
+ 116:ButtonPadControllerSPI_v15.c **** 	}
+ 117:ButtonPadControllerSPI_v15.c **** 	count=0;
+ 118:ButtonPadControllerSPI_v15.c **** 	fill16(redf, 0x00);
+ 119:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0x00);
+ 120:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0xff);
+ 121:ButtonPadControllerSPI_v15.c **** 	while(count<3000){
+ 122:ButtonPadControllerSPI_v15.c **** 		display();
+ 123:ButtonPadControllerSPI_v15.c **** 		count++;
+ 124:ButtonPadControllerSPI_v15.c **** 	}
+ 125:ButtonPadControllerSPI_v15.c **** 	fill16(redf, 0x00);
+ 126:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0x00);
+ 127:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0x00);
+ 128:ButtonPadControllerSPI_v15.c **** 	redf[NUMBER_OF_BOARDS-1]=0xff;
+ 129:ButtonPadControllerSPI_v15.c **** 	greenf[NUMBER_OF_BOARDS-1]=0xff;
+ 130:ButtonPadControllerSPI_v15.c **** 	bluef[NUMBER_OF_BOARDS-1]=0xff;
+ 131:ButtonPadControllerSPI_v15.c **** 	
+ 132:ButtonPadControllerSPI_v15.c **** 	while(1)
+ 133:ButtonPadControllerSPI_v15.c **** 	{
+ 134:ButtonPadControllerSPI_v15.c **** 		//Keep displaying until we get a new board image
+ 135:ButtonPadControllerSPI_v15.c **** 		while(!board_complete && (enter_command_mode!=2)){
+ 136:ButtonPadControllerSPI_v15.c **** 			display();
+ 137:ButtonPadControllerSPI_v15.c **** 			if(boards_received==0)for(int i=0; i<NUMBER_OF_LEDS; i++)outgoing_board[i+48]=buttons[i];
+ 138:ButtonPadControllerSPI_v15.c **** 			
+ 139:ButtonPadControllerSPI_v15.c **** 			//If we've received a CS pulse, then we should reset the frame indices
+ 140:ButtonPadControllerSPI_v15.c **** 			if(!(PINB & (1<<SPI_CS))){
+ 141:ButtonPadControllerSPI_v15.c **** 				cli();
+ 142:ButtonPadControllerSPI_v15.c **** 				bit_count_input=0;
+ 143:ButtonPadControllerSPI_v15.c **** 				bit_count_output=0;
+ 144:ButtonPadControllerSPI_v15.c **** 				incoming_board_index=0;
+ 145:ButtonPadControllerSPI_v15.c **** 				outgoing_board_index=0;
+ 146:ButtonPadControllerSPI_v15.c **** 				sei();
+ 147:ButtonPadControllerSPI_v15.c **** 			}
+ 148:ButtonPadControllerSPI_v15.c **** 		}
+ 149:ButtonPadControllerSPI_v15.c **** 		cli();
+ 150:ButtonPadControllerSPI_v15.c **** 		if(board_complete){	
+ 151:ButtonPadControllerSPI_v15.c **** 			board_complete=0;
+ 152:ButtonPadControllerSPI_v15.c **** 			boards_received+=1;
+ 153:ButtonPadControllerSPI_v15.c **** 			
+ 154:ButtonPadControllerSPI_v15.c **** 			//If we've received a complete data set then retrieve the new board color values
+ 155:ButtonPadControllerSPI_v15.c **** 			if(boards_received>=NUMBER_OF_BOARDS){
+ 156:ButtonPadControllerSPI_v15.c **** 				for(int i=0; i<NUMBER_OF_LEDS; i++)redf[i]=incoming_board[i];
+ 157:ButtonPadControllerSPI_v15.c **** 				for(int i=0; i<NUMBER_OF_LEDS; i++)greenf[i]=incoming_board[i+16];
+ 158:ButtonPadControllerSPI_v15.c **** 				for(int i=0; i<NUMBER_OF_LEDS; i++)bluef[i]=incoming_board[i+32];
+ 159:ButtonPadControllerSPI_v15.c **** 				boards_received=0;
+ 160:ButtonPadControllerSPI_v15.c **** 			}
+ 161:ButtonPadControllerSPI_v15.c **** 			//If we haven't received a complete data set, then send the data on to the next board
+ 162:ButtonPadControllerSPI_v15.c **** 			else for(int i=0; i<NUMBER_OF_LEDS*4; i++)outgoing_board[i]=incoming_board[i];
+ 163:ButtonPadControllerSPI_v15.c **** 		}
+ 164:ButtonPadControllerSPI_v15.c **** 		
+ 165:ButtonPadControllerSPI_v15.c **** 		if(enter_command_mode==2){			
+ 166:ButtonPadControllerSPI_v15.c **** 			//Get the command id from the SPI bus
+ 167:ButtonPadControllerSPI_v15.c **** 			for(int id_bit=0; id_bit<8; id_bit++){
+ 168:ButtonPadControllerSPI_v15.c **** 				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+ 169:ButtonPadControllerSPI_v15.c **** 				
+ 170:ButtonPadControllerSPI_v15.c **** 				if(PINB & (1<<SPI_IN))command_id |= (1<<id_bit);
+ 171:ButtonPadControllerSPI_v15.c **** 				else command_id &= ~(1<<id_bit);
+ 172:ButtonPadControllerSPI_v15.c **** 				
+ 173:ButtonPadControllerSPI_v15.c **** 				while(PINB & (1<<SPI_SCLK));	//Wait for the SPI clock to go low before getting next bit.
+ 174:ButtonPadControllerSPI_v15.c **** 			}
+ 175:ButtonPadControllerSPI_v15.c **** 			
+ 176:ButtonPadControllerSPI_v15.c **** 			//Get the command byte from the SPI bus
+ 177:ButtonPadControllerSPI_v15.c **** 			for(int data_bit=0; data_bit<8; data_bit++){
+ 178:ButtonPadControllerSPI_v15.c **** 				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+ 179:ButtonPadControllerSPI_v15.c **** 				
+ 180:ButtonPadControllerSPI_v15.c **** 				if(PINB & (1<<SPI_IN))command_byte |= (1<<data_bit);
+ 181:ButtonPadControllerSPI_v15.c **** 				else command_byte &= ~(1<<data_bit);
+ 182:ButtonPadControllerSPI_v15.c **** 				
+ 183:ButtonPadControllerSPI_v15.c **** 				while(PINB & (1<<SPI_SCLK));	//Wait for the SPI clock to go low before getting next bit.
+ 184:ButtonPadControllerSPI_v15.c **** 			}
+ 185:ButtonPadControllerSPI_v15.c **** 			enter_command_mode=0;
+ 186:ButtonPadControllerSPI_v15.c **** 		}
+ 187:ButtonPadControllerSPI_v15.c **** 		//If we received a command, lets handle it!
+ 188:ButtonPadControllerSPI_v15.c **** 		if(command_id==CHANGE_NUM_BOARDS){
+ 189:ButtonPadControllerSPI_v15.c **** 			NUMBER_OF_BOARDS=command_byte;
+ 190:ButtonPadControllerSPI_v15.c **** 			write_to_EEPROM(NUMBER_OF_BOARDS_ADDRESS, NUMBER_OF_BOARDS);
+ 191:ButtonPadControllerSPI_v15.c **** 		}
+ 192:ButtonPadControllerSPI_v15.c **** 		sei();
+ 193:ButtonPadControllerSPI_v15.c **** 	}
+ 194:ButtonPadControllerSPI_v15.c **** 
+ 195:ButtonPadControllerSPI_v15.c **** 	return (0);
+ 196:ButtonPadControllerSPI_v15.c **** }
+ 197:ButtonPadControllerSPI_v15.c **** 
+ 198:ButtonPadControllerSPI_v15.c **** void fill16(volatile uint8_t* src, uint8_t fill)
+ 199:ButtonPadControllerSPI_v15.c **** {
+ 268               		.loc 1 199 0
+ 269               		.cfi_startproc
+ 270               	.LVL0:
+ 271               	/* prologue: function */
+ 272               	/* frame size = 0 */
+ 273               	/* stack size = 0 */
+ 274               	.L__stack_usage = 0
+ 200:ButtonPadControllerSPI_v15.c ****     int i;
+ 201:ButtonPadControllerSPI_v15.c ****     for (i = 0; i < 16; i++)
+ 275               		.loc 1 201 0
+ 276 01a0 20E0      		ldi r18,0
+ 277 01a2 30E0      		ldi r19,0
+ 278               	.LVL1:
+ 279               	.L18:
+ 280 01a4 FC01      		movw r30,r24
+ 281 01a6 E20F      		add r30,r18
+ 282 01a8 F31F      		adc r31,r19
+ 202:ButtonPadControllerSPI_v15.c ****     {
+ 203:ButtonPadControllerSPI_v15.c ****         src[i] = fill;
+ 283               		.loc 1 203 0 discriminator 3
+ 284 01aa 6083      		st Z,r22
+ 201:ButtonPadControllerSPI_v15.c ****     {
+ 285               		.loc 1 201 0 discriminator 3
+ 286 01ac 2F5F      		subi r18,-1
+ 287 01ae 3F4F      		sbci r19,-1
+ 288               	.LVL2:
+ 289 01b0 2031      		cpi r18,16
+ 290 01b2 3105      		cpc r19,__zero_reg__
+ 291 01b4 01F4      		brne .L18
+ 292               	/* epilogue start */
+ 204:ButtonPadControllerSPI_v15.c ****     }
+ 205:ButtonPadControllerSPI_v15.c **** }
+ 293               		.loc 1 205 0
+ 294 01b6 0895      		ret
+ 295               		.cfi_endproc
+ 296               	.LFE6:
+ 298               	.global	delay_short
+ 300               	delay_short:
+ 301               	.LFB9:
+ 206:ButtonPadControllerSPI_v15.c **** 
+ 207:ButtonPadControllerSPI_v15.c **** //Initializes the I/O pins of the ATmega168.
+ 208:ButtonPadControllerSPI_v15.c **** //Initializes the Shift Register
+ 209:ButtonPadControllerSPI_v15.c **** //Sets up the Interrupt
+ 210:ButtonPadControllerSPI_v15.c **** //Initalizes the System Parameters for this board
+ 211:ButtonPadControllerSPI_v15.c **** void ioinit (void)
+ 212:ButtonPadControllerSPI_v15.c **** {
+ 213:ButtonPadControllerSPI_v15.c **** 
+ 214:ButtonPadControllerSPI_v15.c ****     //1 = output, 0 = input
+ 215:ButtonPadControllerSPI_v15.c **** 	DDRB |= (1<<SPI_OUT);	//Port B OUtputs
+ 216:ButtonPadControllerSPI_v15.c **** 	DDRB &= ~((1<<SPI_IN) | (1<<SPI_SCLK) | (1<<SPI_CS)); //Port B Inputs
+ 217:ButtonPadControllerSPI_v15.c **** 	PORTB |= ((1<<SPI_IN) | (1<<SPI_SCLK) | (1<<SPI_CS));	//Use Pull-Ups
+ 218:ButtonPadControllerSPI_v15.c **** 	SPCR=0;
+ 219:ButtonPadControllerSPI_v15.c **** 			
+ 220:ButtonPadControllerSPI_v15.c ****     DDRC = 0xFF; //Shift Register Outputs
+ 221:ButtonPadControllerSPI_v15.c ****     
+ 222:ButtonPadControllerSPI_v15.c **** 	DDRD = 0x0F; //Bits 0-3: LED Cathode for rows; Bits 4-7: Button Inputs
+ 223:ButtonPadControllerSPI_v15.c **** 	PORTD = 0xF0;	//Enable pull-ups on button inputs
+ 224:ButtonPadControllerSPI_v15.c ****     
+ 225:ButtonPadControllerSPI_v15.c ****     cbi(PORTC, SR_CLEAR); //Clear current registers
+ 226:ButtonPadControllerSPI_v15.c ****     delay_short(HOLD_TIME);
+ 227:ButtonPadControllerSPI_v15.c ****     sbi(PORTC, SR_CLEAR);
+ 228:ButtonPadControllerSPI_v15.c **** 	
+ 229:ButtonPadControllerSPI_v15.c **** 	//Setup Interrupts to be generated on SPI_SCK Pin Change
+ 230:ButtonPadControllerSPI_v15.c **** 	PCICR = (1<<0);	//Enable Pin Change Interrupts on PCINT0
+ 231:ButtonPadControllerSPI_v15.c **** 	PCMSK0 = (1<<SPI_SCLK);	//Enable PC interrupts on the SPI_SCK pin
+ 232:ButtonPadControllerSPI_v15.c **** 	
+ 233:ButtonPadControllerSPI_v15.c **** 	//Load the number of boards from EEPROM
+ 234:ButtonPadControllerSPI_v15.c **** 	NUMBER_OF_BOARDS = read_from_EEPROM(NUMBER_OF_BOARDS_ADDRESS);
+ 235:ButtonPadControllerSPI_v15.c **** 	if(NUMBER_OF_BOARDS == 0 || NUMBER_OF_BOARDS > 16){
+ 236:ButtonPadControllerSPI_v15.c **** 		NUMBER_OF_BOARDS=1;
+ 237:ButtonPadControllerSPI_v15.c **** 		write_to_EEPROM(NUMBER_OF_BOARDS_ADDRESS, NUMBER_OF_BOARDS);
+ 238:ButtonPadControllerSPI_v15.c **** 	}	
+ 239:ButtonPadControllerSPI_v15.c **** 	sei();
+ 240:ButtonPadControllerSPI_v15.c **** 	
+ 241:ButtonPadControllerSPI_v15.c ****     row = 0;
+ 242:ButtonPadControllerSPI_v15.c **** }
+ 243:ButtonPadControllerSPI_v15.c **** 
+ 244:ButtonPadControllerSPI_v15.c **** //SUMMARY: Sends a row of color values to the board
+ 245:ButtonPadControllerSPI_v15.c **** //Clocks out a 16-bit row_colors to the shift registers and enables them
+ 246:ButtonPadControllerSPI_v15.c **** //Also opens drain for given row
+ 247:ButtonPadControllerSPI_v15.c **** void clock_byte(volatile uint16_t row_colors, volatile uint8_t rowNum)
+ 248:ButtonPadControllerSPI_v15.c **** {  	
+ 249:ButtonPadControllerSPI_v15.c **** 	for(int i = 0; i < 16; i++)
+ 250:ButtonPadControllerSPI_v15.c ****     {
+ 251:ButtonPadControllerSPI_v15.c ****         cbi(PORTC, SR_SCK);
+ 252:ButtonPadControllerSPI_v15.c **** 
+ 253:ButtonPadControllerSPI_v15.c ****         if (row_colors & (1 << i))
+ 254:ButtonPadControllerSPI_v15.c ****             sbi(PORTC, SR_DATA);
+ 255:ButtonPadControllerSPI_v15.c ****         else
+ 256:ButtonPadControllerSPI_v15.c ****             cbi(PORTC, SR_DATA);
+ 257:ButtonPadControllerSPI_v15.c ****     
+ 258:ButtonPadControllerSPI_v15.c ****         sbi(PORTC, SR_SCK);
+ 259:ButtonPadControllerSPI_v15.c ****     }
+ 260:ButtonPadControllerSPI_v15.c ****         
+ 261:ButtonPadControllerSPI_v15.c **** 	sbi(PORTC, SR_EN); //Disable outputs
+ 262:ButtonPadControllerSPI_v15.c **** 
+ 263:ButtonPadControllerSPI_v15.c ****     cbi(PORTC, SR_LATCH); 
+ 264:ButtonPadControllerSPI_v15.c **** 	delay_short(HOLD_TIME);
+ 265:ButtonPadControllerSPI_v15.c ****     sbi(PORTC, SR_LATCH); //Latch the current data clocked into registers
+ 266:ButtonPadControllerSPI_v15.c ****  
+ 267:ButtonPadControllerSPI_v15.c **** 	//Turn on LED's of the current row
+ 268:ButtonPadControllerSPI_v15.c ****     PORTD &= 0xF0;		//Make sure we keep the high bytes of PortD(Button Values)
+ 269:ButtonPadControllerSPI_v15.c ****     PORTD |= (1 << rowNum);	//Put the rowNum on the Port D pins
+ 270:ButtonPadControllerSPI_v15.c ****     cbi(PORTC, SR_EN); //Enable outputs
+ 271:ButtonPadControllerSPI_v15.c **** }    
+ 272:ButtonPadControllerSPI_v15.c **** 
+ 273:ButtonPadControllerSPI_v15.c **** //General short delays
+ 274:ButtonPadControllerSPI_v15.c **** void delay_short(uint16_t x)
+ 275:ButtonPadControllerSPI_v15.c **** {
+ 302               		.loc 1 275 0
+ 303               		.cfi_startproc
+ 304               	/* prologue: function */
+ 305               	/* frame size = 0 */
+ 306               	/* stack size = 0 */
+ 307               	.L__stack_usage = 0
+ 308               	.LVL3:
+ 309               	.L21:
+ 276:ButtonPadControllerSPI_v15.c ****   for ( ; x > 0 ; x--){
+ 310               		.loc 1 276 0 discriminator 1
+ 311 01b8 0097      		sbiw r24,0
+ 312 01ba 01F0      		breq .L20
+ 313               	.LVL4:
+ 314               	.LBB2:
+ 277:ButtonPadControllerSPI_v15.c ****     for (char y = 0;  y <  5; y++){
+ 278:ButtonPadControllerSPI_v15.c ****         asm volatile ("nop");
+ 315               		.loc 1 278 0
+ 316               	/* #APP */
+ 317               	 ;  278 "ButtonPadControllerSPI_v15.c" 1
+ 318 01bc 0000      		nop
+ 319               	 ;  0 "" 2
+ 320               	.LVL5:
+ 321               	 ;  278 "ButtonPadControllerSPI_v15.c" 1
+ 322 01be 0000      		nop
+ 323               	 ;  0 "" 2
+ 324               	.LVL6:
+ 325               	 ;  278 "ButtonPadControllerSPI_v15.c" 1
+ 326 01c0 0000      		nop
+ 327               	 ;  0 "" 2
+ 328               	.LVL7:
+ 329               	 ;  278 "ButtonPadControllerSPI_v15.c" 1
+ 330 01c2 0000      		nop
+ 331               	 ;  0 "" 2
+ 332               	.LVL8:
+ 333               	 ;  278 "ButtonPadControllerSPI_v15.c" 1
+ 334 01c4 0000      		nop
+ 335               	 ;  0 "" 2
+ 336               	.LVL9:
+ 337               	/* #NOAPP */
+ 338               	.LBE2:
+ 276:ButtonPadControllerSPI_v15.c ****   for ( ; x > 0 ; x--){
+ 339               		.loc 1 276 0
+ 340 01c6 0197      		sbiw r24,1
+ 341               	.LVL10:
+ 342 01c8 00C0      		rjmp .L21
+ 343               	.LVL11:
+ 344               	.L20:
+ 345 01ca 0895      		ret
+ 346               		.cfi_endproc
+ 347               	.LFE9:
+ 349               	.global	clock_byte
+ 351               	clock_byte:
+ 352               	.LFB8:
+ 248:ButtonPadControllerSPI_v15.c **** 	for(int i = 0; i < 16; i++)
+ 353               		.loc 1 248 0
+ 354               		.cfi_startproc
+ 355               	.LVL12:
+ 356 01cc CF93      		push r28
+ 357               	.LCFI10:
+ 358               		.cfi_def_cfa_offset 3
+ 359               		.cfi_offset 28, -2
+ 360 01ce DF93      		push r29
+ 361               	.LCFI11:
+ 362               		.cfi_def_cfa_offset 4
+ 363               		.cfi_offset 29, -3
+ 364 01d0 00D0      		rcall .
+ 365 01d2 1F92      		push __zero_reg__
+ 366               	.LCFI12:
+ 367               		.cfi_def_cfa_offset 7
+ 368 01d4 CDB7      		in r28,__SP_L__
+ 369 01d6 DEB7      		in r29,__SP_H__
+ 370               	.LCFI13:
+ 371               		.cfi_def_cfa_register 28
+ 372               	/* prologue: function */
+ 373               	/* frame size = 3 */
+ 374               	/* stack size = 5 */
+ 375               	.L__stack_usage = 5
+ 376 01d8 9A83      		std Y+2,r25
+ 377 01da 8983      		std Y+1,r24
+ 378 01dc 6B83      		std Y+3,r22
+ 379               	.LVL13:
+ 380               	.LBB3:
+ 249:ButtonPadControllerSPI_v15.c ****     {
+ 381               		.loc 1 249 0
+ 382 01de 80E0      		ldi r24,0
+ 383 01e0 90E0      		ldi r25,0
+ 384               	.LVL14:
+ 253:ButtonPadControllerSPI_v15.c ****             sbi(PORTC, SR_DATA);
+ 385               		.loc 1 253 0
+ 386 01e2 41E0      		ldi r20,lo8(1)
+ 387 01e4 50E0      		ldi r21,0
+ 388               	.LVL15:
+ 389               	.L27:
+ 251:ButtonPadControllerSPI_v15.c **** 
+ 390               		.loc 1 251 0
+ 391 01e6 4098      		cbi 0x8,0
+ 253:ButtonPadControllerSPI_v15.c ****             sbi(PORTC, SR_DATA);
+ 392               		.loc 1 253 0
+ 393 01e8 2981      		ldd r18,Y+1
+ 394 01ea 3A81      		ldd r19,Y+2
+ 395 01ec BA01      		movw r22,r20
+ 396 01ee 082E      		mov r0,r24
+ 397 01f0 00C0      		rjmp 2f
+ 398               		1:
+ 399 01f2 660F      		lsl r22
+ 400 01f4 771F      		rol r23
+ 401               		2:
+ 402 01f6 0A94      		dec r0
+ 403 01f8 02F4      		brpl 1b
+ 404 01fa 2623      		and r18,r22
+ 405 01fc 3723      		and r19,r23
+ 406 01fe 232B      		or r18,r19
+ 407 0200 01F0      		breq .L25
+ 254:ButtonPadControllerSPI_v15.c ****         else
+ 408               		.loc 1 254 0
+ 409 0202 419A      		sbi 0x8,1
+ 410 0204 00C0      		rjmp .L26
+ 411               	.L25:
+ 256:ButtonPadControllerSPI_v15.c ****     
+ 412               		.loc 1 256 0
+ 413 0206 4198      		cbi 0x8,1
+ 414               	.L26:
+ 258:ButtonPadControllerSPI_v15.c ****     }
+ 415               		.loc 1 258 0 discriminator 2
+ 416 0208 409A      		sbi 0x8,0
+ 249:ButtonPadControllerSPI_v15.c ****     {
+ 417               		.loc 1 249 0 discriminator 2
+ 418 020a 0196      		adiw r24,1
+ 419               	.LVL16:
+ 420 020c 8031      		cpi r24,16
+ 421 020e 9105      		cpc r25,__zero_reg__
+ 422 0210 01F4      		brne .L27
+ 423               	.LBE3:
+ 261:ButtonPadControllerSPI_v15.c **** 
+ 424               		.loc 1 261 0
+ 425 0212 449A      		sbi 0x8,4
+ 263:ButtonPadControllerSPI_v15.c **** 	delay_short(HOLD_TIME);
+ 426               		.loc 1 263 0
+ 427 0214 4298      		cbi 0x8,2
+ 264:ButtonPadControllerSPI_v15.c ****     sbi(PORTC, SR_LATCH); //Latch the current data clocked into registers
+ 428               		.loc 1 264 0
+ 429 0216 81E0      		ldi r24,lo8(1)
+ 430 0218 90E0      		ldi r25,0
+ 431               	.LVL17:
+ 432 021a 0E94 0000 		call delay_short
+ 433               	.LVL18:
+ 265:ButtonPadControllerSPI_v15.c ****  
+ 434               		.loc 1 265 0
+ 435 021e 429A      		sbi 0x8,2
+ 268:ButtonPadControllerSPI_v15.c ****     PORTD |= (1 << rowNum);	//Put the rowNum on the Port D pins
+ 436               		.loc 1 268 0
+ 437 0220 8BB1      		in r24,0xb
+ 438 0222 807F      		andi r24,lo8(-16)
+ 439 0224 8BB9      		out 0xb,r24
+ 269:ButtonPadControllerSPI_v15.c ****     cbi(PORTC, SR_EN); //Enable outputs
+ 440               		.loc 1 269 0
+ 441 0226 3B81      		ldd r19,Y+3
+ 442 0228 2BB1      		in r18,0xb
+ 443 022a 81E0      		ldi r24,lo8(1)
+ 444 022c 90E0      		ldi r25,0
+ 445 022e 00C0      		rjmp 2f
+ 446               		1:
+ 447 0230 880F      		lsl r24
+ 448               		2:
+ 449 0232 3A95      		dec r19
+ 450 0234 02F4      		brpl 1b
+ 451 0236 822B      		or r24,r18
+ 452 0238 8BB9      		out 0xb,r24
+ 270:ButtonPadControllerSPI_v15.c **** }    
+ 453               		.loc 1 270 0
+ 454 023a 4498      		cbi 0x8,4
+ 455               	/* epilogue start */
+ 271:ButtonPadControllerSPI_v15.c **** 
+ 456               		.loc 1 271 0
+ 457 023c 0F90      		pop __tmp_reg__
+ 458 023e 0F90      		pop __tmp_reg__
+ 459 0240 0F90      		pop __tmp_reg__
+ 460 0242 DF91      		pop r29
+ 461 0244 CF91      		pop r28
+ 462               	.LVL19:
+ 463 0246 0895      		ret
+ 464               		.cfi_endproc
+ 465               	.LFE8:
+ 467               	.global	newcolor
+ 469               	newcolor:
+ 470               	.LFB10:
+ 279:ButtonPadControllerSPI_v15.c ****     }
+ 280:ButtonPadControllerSPI_v15.c ****   }
+ 281:ButtonPadControllerSPI_v15.c **** }
+ 282:ButtonPadControllerSPI_v15.c **** 
+ 283:ButtonPadControllerSPI_v15.c **** //Generates a "random" new color for the input color arrays
+ 284:ButtonPadControllerSPI_v15.c **** void newcolor(uint8_t * r, uint8_t * g, uint8_t * b)
+ 285:ButtonPadControllerSPI_v15.c **** {
+ 471               		.loc 1 285 0
+ 472               		.cfi_startproc
+ 473               	.LVL20:
+ 474 0248 CF93      		push r28
+ 475               	.LCFI14:
+ 476               		.cfi_def_cfa_offset 3
+ 477               		.cfi_offset 28, -2
+ 478 024a DF93      		push r29
+ 479               	.LCFI15:
+ 480               		.cfi_def_cfa_offset 4
+ 481               		.cfi_offset 29, -3
+ 482               	/* prologue: function */
+ 483               	/* frame size = 0 */
+ 484               	/* stack size = 2 */
+ 485               	.L__stack_usage = 2
+ 486 024c DC01      		movw r26,r24
+ 286:ButtonPadControllerSPI_v15.c **** 
+ 287:ButtonPadControllerSPI_v15.c ****   uint16_t k = *r | (*g << 3) | (*b << 6);
+ 487               		.loc 1 287 0
+ 488 024e 8C91      		ld r24,X
+ 489               	.LVL21:
+ 490 0250 EB01      		movw r28,r22
+ 491 0252 2881      		ld r18,Y
+ 492 0254 D8E0      		ldi r29,lo8(8)
+ 493 0256 2D9F      		mul r18,r29
+ 494 0258 9001      		movw r18,r0
+ 495 025a 1124      		clr __zero_reg__
+ 496 025c 282B      		or r18,r24
+ 497 025e EA01      		movw r28,r20
+ 498 0260 E881      		ld r30,Y
+ 499 0262 D0E4      		ldi r29,lo8(64)
+ 500 0264 ED9F      		mul r30,r29
+ 501 0266 F001      		movw r30,r0
+ 502 0268 1124      		clr __zero_reg__
+ 503 026a 2E2B      		or r18,r30
+ 504 026c 3F2B      		or r19,r31
+ 505               	.LVL22:
+ 288:ButtonPadControllerSPI_v15.c ****   uint8_t i,j;
+ 289:ButtonPadControllerSPI_v15.c ****   
+ 290:ButtonPadControllerSPI_v15.c ****   i = k&0xff;
+ 506               		.loc 1 290 0
+ 507 026e 922F      		mov r25,r18
+ 508               	.LVL23:
+ 291:ButtonPadControllerSPI_v15.c ****   j = k >> 8;
+ 509               		.loc 1 291 0
+ 510 0270 832F      		mov r24,r19
+ 511               	.LVL24:
+ 512               	.L30:
+ 292:ButtonPadControllerSPI_v15.c ****   while((i*j)==0)
+ 513               		.loc 1 292 0
+ 514 0272 989F      		mul r25,r24
+ 515 0274 9001      		movw r18,r0
+ 516 0276 1124      		clr __zero_reg__
+ 517 0278 2115      		cp r18,__zero_reg__
+ 518 027a 3105      		cpc r19,__zero_reg__
+ 519 027c 01F4      		brne .L32
+ 293:ButtonPadControllerSPI_v15.c ****   {
+ 294:ButtonPadControllerSPI_v15.c ****     i=i+j+1;
+ 520               		.loc 1 294 0
+ 521 027e 980F      		add r25,r24
+ 522               	.LVL25:
+ 523 0280 9F5F      		subi r25,lo8(-(1))
+ 524               	.LVL26:
+ 295:ButtonPadControllerSPI_v15.c ****     j=j+3;
+ 525               		.loc 1 295 0
+ 526 0282 8D5F      		subi r24,lo8(-(3))
+ 527               	.LVL27:
+ 528 0284 00C0      		rjmp .L30
+ 529               	.L32:
+ 530               	.LVL28:
+ 296:ButtonPadControllerSPI_v15.c ****   }
+ 297:ButtonPadControllerSPI_v15.c ****   k=i*j;
+ 298:ButtonPadControllerSPI_v15.c ****   *r=k&7;
+ 531               		.loc 1 298 0
+ 532 0286 822F      		mov r24,r18
+ 533               	.LVL29:
+ 534 0288 8770      		andi r24,lo8(7)
+ 535 028a 8C93      		st X,r24
+ 299:ButtonPadControllerSPI_v15.c ****   *g=(k>>3)&7;
+ 536               		.loc 1 299 0
+ 537 028c C901      		movw r24,r18
+ 538 028e E3E0      		ldi r30,3
+ 539               		1:
+ 540 0290 9695      		lsr r25
+ 541 0292 8795      		ror r24
+ 542 0294 EA95      		dec r30
+ 543 0296 01F4      		brne 1b
+ 544 0298 8770      		andi r24,lo8(7)
+ 545 029a FB01      		movw r30,r22
+ 546 029c 8083      		st Z,r24
+ 300:ButtonPadControllerSPI_v15.c ****   *b=(k>>6)&7;
+ 547               		.loc 1 300 0
+ 548 029e F6E0      		ldi r31,6
+ 549               		1:
+ 550 02a0 3695      		lsr r19
+ 551 02a2 2795      		ror r18
+ 552 02a4 FA95      		dec r31
+ 553 02a6 01F4      		brne 1b
+ 554               	.LVL30:
+ 555 02a8 2770      		andi r18,lo8(7)
+ 556 02aa EA01      		movw r28,r20
+ 557 02ac 2883      		st Y,r18
+ 558               	/* epilogue start */
+ 301:ButtonPadControllerSPI_v15.c **** }
+ 559               		.loc 1 301 0
+ 560 02ae DF91      		pop r29
+ 561 02b0 CF91      		pop r28
+ 562 02b2 0895      		ret
+ 563               		.cfi_endproc
+ 564               	.LFE10:
+ 566               	.global	display
+ 568               	display:
+ 569               	.LFB11:
+ 302:ButtonPadControllerSPI_v15.c **** 
+ 303:ButtonPadControllerSPI_v15.c **** //Combines the three color frames to determine the color for each row. Also 
+ 304:ButtonPadControllerSPI_v15.c **** //determines the button status of the board
+ 305:ButtonPadControllerSPI_v15.c **** void display(void){
+ 570               		.loc 1 305 0
+ 571               		.cfi_startproc
+ 572 02b4 CF93      		push r28
+ 573               	.LCFI16:
+ 574               		.cfi_def_cfa_offset 3
+ 575               		.cfi_offset 28, -2
+ 576 02b6 DF93      		push r29
+ 577               	.LCFI17:
+ 578               		.cfi_def_cfa_offset 4
+ 579               		.cfi_offset 29, -3
+ 580               	/* prologue: function */
+ 581               	/* frame size = 0 */
+ 582               	/* stack size = 2 */
+ 583               	.L__stack_usage = 2
+ 584               	.LVL31:
+ 306:ButtonPadControllerSPI_v15.c ****     uint16_t lineByte=0; //byte that carries this line's LED info
+ 307:ButtonPadControllerSPI_v15.c ****     uint8_t row_offset,LED, buttonRow;
+ 308:ButtonPadControllerSPI_v15.c **** 
+ 309:ButtonPadControllerSPI_v15.c ****     row = (row + 1) & 3; //Only 4 rows
+ 585               		.loc 1 309 0
+ 586 02b8 8091 0000 		lds r24,row
+ 587 02bc 8F5F      		subi r24,lo8(-(1))
+ 588 02be 8370      		andi r24,lo8(3)
+ 589 02c0 8093 0000 		sts row,r24
+ 310:ButtonPadControllerSPI_v15.c ****     if(row == 0) frame_num = (frame_num + 1) & (COLOR_DEPTH); //Limits frame count to COLOR_DEPTH f
+ 590               		.loc 1 310 0
+ 591 02c4 8091 0000 		lds r24,row
+ 592 02c8 8111      		cpse r24,__zero_reg__
+ 593 02ca 00C0      		rjmp .L34
+ 594               		.loc 1 310 0 is_stmt 0 discriminator 1
+ 595 02cc 8091 0000 		lds r24,frame_num
+ 596 02d0 9091 0000 		lds r25,frame_num+1
+ 597 02d4 0196      		adiw r24,1
+ 598 02d6 8770      		andi r24,7
+ 599 02d8 9927      		clr r25
+ 600 02da 9093 0000 		sts frame_num+1,r25
+ 601 02de 8093 0000 		sts frame_num,r24
+ 602               	.L34:
+ 311:ButtonPadControllerSPI_v15.c **** 
+ 312:ButtonPadControllerSPI_v15.c ****     row_offset = row << 2;
+ 603               		.loc 1 312 0 is_stmt 1
+ 604 02e2 6091 0000 		lds r22,row
+ 605 02e6 660F      		lsl r22
+ 606 02e8 660F      		lsl r22
+ 607               	.LVL32:
+ 608 02ea C0E0      		ldi r28,0
+ 609 02ec D0E0      		ldi r29,0
+ 306:ButtonPadControllerSPI_v15.c ****     uint8_t row_offset,LED, buttonRow;
+ 610               		.loc 1 306 0
+ 611 02ee 80E0      		ldi r24,0
+ 612 02f0 90E0      		ldi r25,0
+ 613               	.LBB4:
+ 313:ButtonPadControllerSPI_v15.c **** 
+ 314:ButtonPadControllerSPI_v15.c ****     for (char column = 0; column < 4; column++) //Only 4 columns
+ 315:ButtonPadControllerSPI_v15.c ****     {
+ 316:ButtonPadControllerSPI_v15.c ****         LED = column + row_offset;
+ 317:ButtonPadControllerSPI_v15.c **** 		
+ 318:ButtonPadControllerSPI_v15.c **** 		if(column != row)lineByte |= (1<<column);
+ 614               		.loc 1 318 0
+ 615 02f2 41E0      		ldi r20,lo8(1)
+ 616 02f4 50E0      		ldi r21,0
+ 617               	.LVL33:
+ 618               	.L39:
+ 619 02f6 2C2F      		mov r18,r28
+ 620 02f8 260F      		add r18,r22
+ 621               	.LVL34:
+ 622 02fa 3091 0000 		lds r19,row
+ 623 02fe 3C17      		cp r19,r28
+ 624 0300 01F0      		breq .L35
+ 625               		.loc 1 318 0 is_stmt 0 discriminator 1
+ 626 0302 FA01      		movw r30,r20
+ 627 0304 0C2E      		mov r0,r28
+ 628 0306 00C0      		rjmp 2f
+ 629               		1:
+ 630 0308 EE0F      		lsl r30
+ 631 030a FF1F      		rol r31
+ 632               		2:
+ 633 030c 0A94      		dec r0
+ 634 030e 02F4      		brpl 1b
+ 635 0310 8E2B      		or r24,r30
+ 636 0312 9F2B      		or r25,r31
+ 637               	.LVL35:
+ 638               	.L35:
+ 319:ButtonPadControllerSPI_v15.c ****         if(greenf[LED] > frame_num) lineByte |= (1 << (column + GREEN_POS));
+ 639               		.loc 1 319 0 is_stmt 1
+ 640 0314 30E0      		ldi r19,0
+ 641 0316 A091 0000 		lds r26,frame_num
+ 642 031a B091 0000 		lds r27,frame_num+1
+ 643 031e F901      		movw r30,r18
+ 644 0320 E050      		subi r30,lo8(-(greenf))
+ 645 0322 F040      		sbci r31,hi8(-(greenf))
+ 646 0324 E081      		ld r30,Z
+ 647 0326 F0E0      		ldi r31,0
+ 648 0328 AE17      		cp r26,r30
+ 649 032a BF07      		cpc r27,r31
+ 650 032c 04F4      		brge .L36
+ 651 032e FE01      		movw r30,r28
+ 652 0330 3496      		adiw r30,4
+ 653               		.loc 1 319 0 is_stmt 0 discriminator 1
+ 654 0332 DA01      		movw r26,r20
+ 655 0334 00C0      		rjmp 2f
+ 656               		1:
+ 657 0336 AA0F      		lsl r26
+ 658 0338 BB1F      		rol r27
+ 659               		2:
+ 660 033a EA95      		dec r30
+ 661 033c 02F4      		brpl 1b
+ 662 033e 8A2B      		or r24,r26
+ 663 0340 9B2B      		or r25,r27
+ 664               	.LVL36:
+ 665               	.L36:
+ 320:ButtonPadControllerSPI_v15.c ****         if(bluef[LED] > frame_num) lineByte |= (1 << (column + BLUE_POS));
+ 666               		.loc 1 320 0 is_stmt 1
+ 667 0342 A091 0000 		lds r26,frame_num
+ 668 0346 B091 0000 		lds r27,frame_num+1
+ 669 034a F901      		movw r30,r18
+ 670 034c E050      		subi r30,lo8(-(bluef))
+ 671 034e F040      		sbci r31,hi8(-(bluef))
+ 672 0350 E081      		ld r30,Z
+ 673 0352 F0E0      		ldi r31,0
+ 674 0354 AE17      		cp r26,r30
+ 675 0356 BF07      		cpc r27,r31
+ 676 0358 04F4      		brge .L37
+ 677 035a FE01      		movw r30,r28
+ 678 035c 3896      		adiw r30,8
+ 679               		.loc 1 320 0 is_stmt 0 discriminator 1
+ 680 035e DA01      		movw r26,r20
+ 681 0360 00C0      		rjmp 2f
+ 682               		1:
+ 683 0362 AA0F      		lsl r26
+ 684 0364 BB1F      		rol r27
+ 685               		2:
+ 686 0366 EA95      		dec r30
+ 687 0368 02F4      		brpl 1b
+ 688 036a 8A2B      		or r24,r26
+ 689 036c 9B2B      		or r25,r27
+ 690               	.LVL37:
+ 691               	.L37:
+ 321:ButtonPadControllerSPI_v15.c ****         if(redf[LED] > frame_num) lineByte |= (1 << (column + RED_POS));
+ 692               		.loc 1 321 0 is_stmt 1
+ 693 036e E091 0000 		lds r30,frame_num
+ 694 0372 F091 0000 		lds r31,frame_num+1
+ 695 0376 D901      		movw r26,r18
+ 696 0378 A050      		subi r26,lo8(-(redf))
+ 697 037a B040      		sbci r27,hi8(-(redf))
+ 698 037c 2C91      		ld r18,X
+ 699               	.LVL38:
+ 700 037e 30E0      		ldi r19,0
+ 701 0380 E217      		cp r30,r18
+ 702 0382 F307      		cpc r31,r19
+ 703 0384 04F4      		brge .L38
+ 704 0386 9E01      		movw r18,r28
+ 705 0388 245F      		subi r18,-12
+ 706 038a 3F4F      		sbci r19,-1
+ 707               		.loc 1 321 0 is_stmt 0 discriminator 1
+ 708 038c FA01      		movw r30,r20
+ 709 038e 00C0      		rjmp 2f
+ 710               		1:
+ 711 0390 EE0F      		lsl r30
+ 712 0392 FF1F      		rol r31
+ 713               		2:
+ 714 0394 2A95      		dec r18
+ 715 0396 02F4      		brpl 1b
+ 716 0398 8E2B      		or r24,r30
+ 717 039a 9F2B      		or r25,r31
+ 718               	.LVL39:
+ 719               	.L38:
+ 720 039c 2196      		adiw r28,1
+ 721               	.LVL40:
+ 314:ButtonPadControllerSPI_v15.c ****     {
+ 722               		.loc 1 314 0 is_stmt 1 discriminator 2
+ 723 039e C430      		cpi r28,4
+ 724 03a0 D105      		cpc r29,__zero_reg__
+ 725 03a2 01F0      		breq .+2
+ 726 03a4 00C0      		rjmp .L39
+ 727               	.LBE4:
+ 322:ButtonPadControllerSPI_v15.c ****     }
+ 323:ButtonPadControllerSPI_v15.c **** 
+ 324:ButtonPadControllerSPI_v15.c ****     //Output the current RGB values to this row
+ 325:ButtonPadControllerSPI_v15.c **** 	clock_byte(lineByte, row);
+ 728               		.loc 1 325 0
+ 729 03a6 6091 0000 		lds r22,row
+ 730               	.LVL41:
+ 731 03aa 0E94 0000 		call clock_byte
+ 732               	.LVL42:
+ 326:ButtonPadControllerSPI_v15.c **** 	
+ 327:ButtonPadControllerSPI_v15.c **** 	//get the button values
+ 328:ButtonPadControllerSPI_v15.c **** 	buttonRow=PIND;	//Get the value of the buttons
+ 733               		.loc 1 328 0
+ 734 03ae 49B1      		in r20,0x9
+ 735               	.LVL43:
+ 736 03b0 20E0      		ldi r18,0
+ 737 03b2 30E0      		ldi r19,0
+ 738               	.LBB5:
+ 329:ButtonPadControllerSPI_v15.c **** 	for(int i=0; i<4; i++){
+ 330:ButtonPadControllerSPI_v15.c **** 		if(buttonRow & (1<<(i+4)))buttons[(i*4)+row]=NOT_PRESSED;
+ 739               		.loc 1 330 0
+ 740 03b4 50E0      		ldi r21,0
+ 741 03b6 EFEF      		ldi r30,lo8(-1)
+ 742               	.LVL44:
+ 743               	.L42:
+ 744 03b8 C901      		movw r24,r18
+ 745 03ba 8050      		subi r24,lo8(-(buttons))
+ 746 03bc 9040      		sbci r25,hi8(-(buttons))
+ 747 03be BA01      		movw r22,r20
+ 748 03c0 0C2E      		mov r0,r28
+ 749 03c2 00C0      		rjmp 2f
+ 750               		1:
+ 751 03c4 7595      		asr r23
+ 752 03c6 6795      		ror r22
+ 753               		2:
+ 754 03c8 0A94      		dec r0
+ 755 03ca 02F4      		brpl 1b
+ 756 03cc 60FF      		sbrs r22,0
+ 757 03ce 00C0      		rjmp .L40
+ 758               		.loc 1 330 0 is_stmt 0 discriminator 1
+ 759 03d0 6091 0000 		lds r22,row
+ 760 03d4 DC01      		movw r26,r24
+ 761 03d6 A60F      		add r26,r22
+ 762 03d8 B11D      		adc r27,__zero_reg__
+ 763 03da EC93      		st X,r30
+ 764 03dc 00C0      		rjmp .L41
+ 765               	.L40:
+ 331:ButtonPadControllerSPI_v15.c **** 		else buttons[(i*4)+row]=PRESSED;
+ 766               		.loc 1 331 0 is_stmt 1
+ 767 03de 6091 0000 		lds r22,row
+ 768 03e2 DC01      		movw r26,r24
+ 769 03e4 A60F      		add r26,r22
+ 770 03e6 B11D      		adc r27,__zero_reg__
+ 771 03e8 1C92      		st X,__zero_reg__
+ 772               	.L41:
+ 773               	.LVL45:
+ 774 03ea 2196      		adiw r28,1
+ 775               	.LVL46:
+ 776 03ec 2C5F      		subi r18,-4
+ 777 03ee 3F4F      		sbci r19,-1
+ 329:ButtonPadControllerSPI_v15.c **** 	for(int i=0; i<4; i++){
+ 778               		.loc 1 329 0 discriminator 2
+ 779 03f0 2031      		cpi r18,16
+ 780 03f2 3105      		cpc r19,__zero_reg__
+ 781 03f4 01F4      		brne .L42
+ 782               	/* epilogue start */
+ 783               	.LBE5:
+ 332:ButtonPadControllerSPI_v15.c **** 	}
+ 333:ButtonPadControllerSPI_v15.c **** }
+ 784               		.loc 1 333 0
+ 785 03f6 DF91      		pop r29
+ 786 03f8 CF91      		pop r28
+ 787               	.LVL47:
+ 788 03fa 0895      		ret
+ 789               		.cfi_endproc
+ 790               	.LFE11:
+ 792               	.global	write_to_EEPROM
+ 794               	write_to_EEPROM:
+ 795               	.LFB12:
+ 334:ButtonPadControllerSPI_v15.c **** 
+ 335:ButtonPadControllerSPI_v15.c **** //Description: Writes an unsigned char(Data)  to the EEPROM at the given Address
+ 336:ButtonPadControllerSPI_v15.c **** //Pre: Unsigned Int Address contains address to be written to
+ 337:ButtonPadControllerSPI_v15.c **** //	 Unsigned Char Data contains data to be written
+ 338:ButtonPadControllerSPI_v15.c **** //Post: EEPROM "Address" contains the "Data"
+ 339:ButtonPadControllerSPI_v15.c **** //Usage: write_to_EEPROM(0, 'A');
+ 340:ButtonPadControllerSPI_v15.c **** void write_to_EEPROM(unsigned int Address, unsigned char Data)
+ 341:ButtonPadControllerSPI_v15.c **** {
+ 796               		.loc 1 341 0
+ 797               		.cfi_startproc
+ 798               	/* prologue: function */
+ 799               	/* frame size = 0 */
+ 800               	/* stack size = 0 */
+ 801               	.L__stack_usage = 0
+ 802               	.LVL48:
+ 803               	.L46:
+ 342:ButtonPadControllerSPI_v15.c ****     //Interrupts are globally disabled!
+ 343:ButtonPadControllerSPI_v15.c **** 	
+ 344:ButtonPadControllerSPI_v15.c **** 	while(EECR & (1<<EEPE)); //Wait for last Write to complete
+ 804               		.loc 1 344 0 discriminator 1
+ 805 03fc F999      		sbic 0x1f,1
+ 806 03fe 00C0      		rjmp .L46
+ 345:ButtonPadControllerSPI_v15.c **** 	//May need to wait for Flash to complete also!
+ 346:ButtonPadControllerSPI_v15.c **** 	EEAR = Address;			//Assign the Address Register with "Address"
+ 807               		.loc 1 346 0
+ 808 0400 92BD      		out 0x21+1,r25
+ 809 0402 81BD      		out 0x21,r24
+ 347:ButtonPadControllerSPI_v15.c **** 	EEDR=Data;				//Put "Data" in the Data Register
+ 810               		.loc 1 347 0
+ 811 0404 60BD      		out 0x20,r22
+ 348:ButtonPadControllerSPI_v15.c **** 	EECR |= (1<<EEMPE); 	//Write to Master Write Enable
+ 812               		.loc 1 348 0
+ 813 0406 FA9A      		sbi 0x1f,2
+ 349:ButtonPadControllerSPI_v15.c **** 	EECR |= (1<<EEPE);  	//Start Write by setting EE Write Enable
+ 814               		.loc 1 349 0
+ 815 0408 F99A      		sbi 0x1f,1
+ 816 040a 0895      		ret
+ 817               		.cfi_endproc
+ 818               	.LFE12:
+ 820               	.global	read_from_EEPROM
+ 822               	read_from_EEPROM:
+ 823               	.LFB13:
+ 350:ButtonPadControllerSPI_v15.c **** 	
+ 351:ButtonPadControllerSPI_v15.c **** }
+ 352:ButtonPadControllerSPI_v15.c **** 
+ 353:ButtonPadControllerSPI_v15.c **** //Description: Reads the EEPROM data at "Address" and returns the character
+ 354:ButtonPadControllerSPI_v15.c **** //Pre: Unsigned Int Address is the address to be read
+ 355:ButtonPadControllerSPI_v15.c **** //Post: Character at "Address" is returned
+ 356:ButtonPadControllerSPI_v15.c **** //Usage: 	unsigned char Data;
+ 357:ButtonPadControllerSPI_v15.c **** //		Data=read_from_EEPROM(0);
+ 358:ButtonPadControllerSPI_v15.c **** unsigned char read_from_EEPROM(unsigned int Address)
+ 359:ButtonPadControllerSPI_v15.c **** {
+ 824               		.loc 1 359 0
+ 825               		.cfi_startproc
+ 826               	/* prologue: function */
+ 827               	/* frame size = 0 */
+ 828               	/* stack size = 0 */
+ 829               	.L__stack_usage = 0
+ 830               	.LVL49:
+ 831               	.L49:
+ 360:ButtonPadControllerSPI_v15.c **** 	//Interrupts are globally disabled!
+ 361:ButtonPadControllerSPI_v15.c **** 	
+ 362:ButtonPadControllerSPI_v15.c **** 	while(EECR & (1<<EEPE));	//Wait for last Write to complete
+ 832               		.loc 1 362 0 discriminator 1
+ 833 040c F999      		sbic 0x1f,1
+ 834 040e 00C0      		rjmp .L49
+ 363:ButtonPadControllerSPI_v15.c **** 	EEAR = Address;				//Assign the Address Register with "Address"
+ 835               		.loc 1 363 0
+ 836 0410 92BD      		out 0x21+1,r25
+ 837 0412 81BD      		out 0x21,r24
+ 364:ButtonPadControllerSPI_v15.c **** 	EECR |= (1<<EERE); 			//Start Read by writing to EER
+ 838               		.loc 1 364 0
+ 839 0414 F89A      		sbi 0x1f,0
+ 365:ButtonPadControllerSPI_v15.c **** 	return EEDR;				//EEPROM Data is returned
+ 840               		.loc 1 365 0
+ 841 0416 80B5      		in r24,0x20
+ 842               	.LVL50:
+ 366:ButtonPadControllerSPI_v15.c **** }
+ 843               		.loc 1 366 0
+ 844 0418 0895      		ret
+ 845               		.cfi_endproc
+ 846               	.LFE13:
+ 848               	.global	ioinit
+ 850               	ioinit:
+ 851               	.LFB7:
+ 212:ButtonPadControllerSPI_v15.c **** 
+ 852               		.loc 1 212 0
+ 853               		.cfi_startproc
+ 854 041a CF93      		push r28
+ 855               	.LCFI18:
+ 856               		.cfi_def_cfa_offset 3
+ 857               		.cfi_offset 28, -2
+ 858               	/* prologue: function */
+ 859               	/* frame size = 0 */
+ 860               	/* stack size = 1 */
+ 861               	.L__stack_usage = 1
+ 215:ButtonPadControllerSPI_v15.c **** 	DDRB &= ~((1<<SPI_IN) | (1<<SPI_SCLK) | (1<<SPI_CS)); //Port B Inputs
+ 862               		.loc 1 215 0
+ 863 041c 239A      		sbi 0x4,3
+ 216:ButtonPadControllerSPI_v15.c **** 	PORTB |= ((1<<SPI_IN) | (1<<SPI_SCLK) | (1<<SPI_CS));	//Use Pull-Ups
+ 864               		.loc 1 216 0
+ 865 041e 84B1      		in r24,0x4
+ 866 0420 8B7C      		andi r24,lo8(-53)
+ 867 0422 84B9      		out 0x4,r24
+ 217:ButtonPadControllerSPI_v15.c **** 	SPCR=0;
+ 868               		.loc 1 217 0
+ 869 0424 85B1      		in r24,0x5
+ 870 0426 8463      		ori r24,lo8(52)
+ 871 0428 85B9      		out 0x5,r24
+ 218:ButtonPadControllerSPI_v15.c **** 			
+ 872               		.loc 1 218 0
+ 873 042a 1CBC      		out 0x2c,__zero_reg__
+ 220:ButtonPadControllerSPI_v15.c ****     
+ 874               		.loc 1 220 0
+ 875 042c 8FEF      		ldi r24,lo8(-1)
+ 876 042e 87B9      		out 0x7,r24
+ 222:ButtonPadControllerSPI_v15.c **** 	PORTD = 0xF0;	//Enable pull-ups on button inputs
+ 877               		.loc 1 222 0
+ 878 0430 8FE0      		ldi r24,lo8(15)
+ 879 0432 8AB9      		out 0xa,r24
+ 223:ButtonPadControllerSPI_v15.c ****     
+ 880               		.loc 1 223 0
+ 881 0434 80EF      		ldi r24,lo8(-16)
+ 882 0436 8BB9      		out 0xb,r24
+ 225:ButtonPadControllerSPI_v15.c ****     delay_short(HOLD_TIME);
+ 883               		.loc 1 225 0
+ 884 0438 4398      		cbi 0x8,3
+ 226:ButtonPadControllerSPI_v15.c ****     sbi(PORTC, SR_CLEAR);
+ 885               		.loc 1 226 0
+ 886 043a 81E0      		ldi r24,lo8(1)
+ 887 043c 90E0      		ldi r25,0
+ 888 043e 0E94 0000 		call delay_short
+ 889               	.LVL51:
+ 227:ButtonPadControllerSPI_v15.c **** 	
+ 890               		.loc 1 227 0
+ 891 0442 439A      		sbi 0x8,3
+ 230:ButtonPadControllerSPI_v15.c **** 	PCMSK0 = (1<<SPI_SCLK);	//Enable PC interrupts on the SPI_SCK pin
+ 892               		.loc 1 230 0
+ 893 0444 C1E0      		ldi r28,lo8(1)
+ 894 0446 C093 6800 		sts 104,r28
+ 231:ButtonPadControllerSPI_v15.c **** 	
+ 895               		.loc 1 231 0
+ 896 044a 80E2      		ldi r24,lo8(32)
+ 897 044c 8093 6B00 		sts 107,r24
+ 234:ButtonPadControllerSPI_v15.c **** 	if(NUMBER_OF_BOARDS == 0 || NUMBER_OF_BOARDS > 16){
+ 898               		.loc 1 234 0
+ 899 0450 80E0      		ldi r24,0
+ 900 0452 90E0      		ldi r25,0
+ 901 0454 0E94 0000 		call read_from_EEPROM
+ 902               	.LVL52:
+ 235:ButtonPadControllerSPI_v15.c **** 		NUMBER_OF_BOARDS=1;
+ 903               		.loc 1 235 0
+ 904 0458 9FEF      		ldi r25,lo8(-1)
+ 905 045a 980F      		add r25,r24
+ 906 045c 9031      		cpi r25,lo8(16)
+ 907 045e 00F4      		brsh .L52
+ 234:ButtonPadControllerSPI_v15.c **** 	if(NUMBER_OF_BOARDS == 0 || NUMBER_OF_BOARDS > 16){
+ 908               		.loc 1 234 0
+ 909 0460 8093 0000 		sts NUMBER_OF_BOARDS,r24
+ 910 0464 00C0      		rjmp .L53
+ 911               	.L52:
+ 236:ButtonPadControllerSPI_v15.c **** 		write_to_EEPROM(NUMBER_OF_BOARDS_ADDRESS, NUMBER_OF_BOARDS);
+ 912               		.loc 1 236 0
+ 913 0466 C093 0000 		sts NUMBER_OF_BOARDS,r28
+ 237:ButtonPadControllerSPI_v15.c **** 	}	
+ 914               		.loc 1 237 0
+ 915 046a 61E0      		ldi r22,lo8(1)
+ 916 046c 80E0      		ldi r24,0
+ 917 046e 90E0      		ldi r25,0
+ 918 0470 0E94 0000 		call write_to_EEPROM
+ 919               	.LVL53:
+ 920               	.L53:
+ 239:ButtonPadControllerSPI_v15.c **** 	
+ 921               		.loc 1 239 0
+ 922               	/* #APP */
+ 923               	 ;  239 "ButtonPadControllerSPI_v15.c" 1
+ 924 0474 7894      		sei
+ 925               	 ;  0 "" 2
+ 241:ButtonPadControllerSPI_v15.c **** }
+ 926               		.loc 1 241 0
+ 927               	/* #NOAPP */
+ 928 0476 1092 0000 		sts row,__zero_reg__
+ 929               	/* epilogue start */
+ 242:ButtonPadControllerSPI_v15.c **** 
+ 930               		.loc 1 242 0
+ 931 047a CF91      		pop r28
+ 932 047c 0895      		ret
+ 933               		.cfi_endproc
+ 934               	.LFE7:
+ 936               		.section	.text.startup,"ax",@progbits
+ 937               	.global	main
+ 939               	main:
+ 940               	.LFB5:
+  96:ButtonPadControllerSPI_v15.c **** 	int count=0;
+ 941               		.loc 1 96 0
+ 942               		.cfi_startproc
+ 943               	/* prologue: function */
+ 944               	/* frame size = 0 */
+ 945               	/* stack size = 0 */
+ 946               	.L__stack_usage = 0
+ 947               	.LVL54:
+  99:ButtonPadControllerSPI_v15.c **** 	
+ 948               		.loc 1 99 0
+ 949 0000 0E94 0000 		call ioinit
+ 950               	.LVL55:
+ 102:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0x00);
+ 951               		.loc 1 102 0
+ 952 0004 6FEF      		ldi r22,lo8(-1)
+ 953 0006 80E0      		ldi r24,lo8(redf)
+ 954 0008 90E0      		ldi r25,hi8(redf)
+ 955 000a 0E94 0000 		call fill16
+ 956               	.LVL56:
+ 103:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0x00);
+ 957               		.loc 1 103 0
+ 958 000e 60E0      		ldi r22,0
+ 959 0010 80E0      		ldi r24,lo8(greenf)
+ 960 0012 90E0      		ldi r25,hi8(greenf)
+ 961 0014 0E94 0000 		call fill16
+ 962               	.LVL57:
+ 104:ButtonPadControllerSPI_v15.c **** 	while(count<3000){
+ 963               		.loc 1 104 0
+ 964 0018 60E0      		ldi r22,0
+ 965 001a 80E0      		ldi r24,lo8(bluef)
+ 966 001c 90E0      		ldi r25,hi8(bluef)
+ 967 001e 0E94 0000 		call fill16
+ 968               	.LVL58:
+ 969 0022 C8EB      		ldi r28,lo8(-72)
+ 970 0024 DBE0      		ldi r29,lo8(11)
+ 971               	.LVL59:
+ 972               	.L55:
+ 106:ButtonPadControllerSPI_v15.c **** 		count++;
+ 973               		.loc 1 106 0
+ 974 0026 0E94 0000 		call display
+ 975               	.LVL60:
+ 976 002a 2197      		sbiw r28,1
+ 977               	.LVL61:
+ 105:ButtonPadControllerSPI_v15.c **** 		display();
+ 978               		.loc 1 105 0
+ 979 002c 01F4      		brne .L55
+ 980               	.LVL62:
+ 110:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0xff);
+ 981               		.loc 1 110 0
+ 982 002e 60E0      		ldi r22,0
+ 983 0030 80E0      		ldi r24,lo8(redf)
+ 984 0032 90E0      		ldi r25,hi8(redf)
+ 985 0034 0E94 0000 		call fill16
+ 986               	.LVL63:
+ 111:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0x00);
+ 987               		.loc 1 111 0
+ 988 0038 6FEF      		ldi r22,lo8(-1)
+ 989 003a 80E0      		ldi r24,lo8(greenf)
+ 990 003c 90E0      		ldi r25,hi8(greenf)
+ 991 003e 0E94 0000 		call fill16
+ 992               	.LVL64:
+ 112:ButtonPadControllerSPI_v15.c **** 	while(count<3000){
+ 993               		.loc 1 112 0
+ 994 0042 60E0      		ldi r22,0
+ 995 0044 80E0      		ldi r24,lo8(bluef)
+ 996 0046 90E0      		ldi r25,hi8(bluef)
+ 997 0048 0E94 0000 		call fill16
+ 998               	.LVL65:
+ 999 004c C8EB      		ldi r28,lo8(-72)
+ 1000 004e DBE0      		ldi r29,lo8(11)
+ 1001               	.LVL66:
+ 1002               	.L56:
+ 114:ButtonPadControllerSPI_v15.c **** 		count++;
+ 1003               		.loc 1 114 0
+ 1004 0050 0E94 0000 		call display
+ 1005               	.LVL67:
+ 1006 0054 2197      		sbiw r28,1
+ 1007               	.LVL68:
+ 113:ButtonPadControllerSPI_v15.c **** 		display();
+ 1008               		.loc 1 113 0
+ 1009 0056 01F4      		brne .L56
+ 1010               	.LVL69:
+ 118:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0x00);
+ 1011               		.loc 1 118 0
+ 1012 0058 60E0      		ldi r22,0
+ 1013 005a 80E0      		ldi r24,lo8(redf)
+ 1014 005c 90E0      		ldi r25,hi8(redf)
+ 1015 005e 0E94 0000 		call fill16
+ 1016               	.LVL70:
+ 119:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0xff);
+ 1017               		.loc 1 119 0
+ 1018 0062 60E0      		ldi r22,0
+ 1019 0064 80E0      		ldi r24,lo8(greenf)
+ 1020 0066 90E0      		ldi r25,hi8(greenf)
+ 1021 0068 0E94 0000 		call fill16
+ 1022               	.LVL71:
+ 120:ButtonPadControllerSPI_v15.c **** 	while(count<3000){
+ 1023               		.loc 1 120 0
+ 1024 006c 6FEF      		ldi r22,lo8(-1)
+ 1025 006e 80E0      		ldi r24,lo8(bluef)
+ 1026 0070 90E0      		ldi r25,hi8(bluef)
+ 1027 0072 0E94 0000 		call fill16
+ 1028               	.LVL72:
+ 1029 0076 C8EB      		ldi r28,lo8(-72)
+ 1030 0078 DBE0      		ldi r29,lo8(11)
+ 1031               	.LVL73:
+ 1032               	.L57:
+ 122:ButtonPadControllerSPI_v15.c **** 		count++;
+ 1033               		.loc 1 122 0
+ 1034 007a 0E94 0000 		call display
+ 1035               	.LVL74:
+ 1036 007e 2197      		sbiw r28,1
+ 1037               	.LVL75:
+ 121:ButtonPadControllerSPI_v15.c **** 		display();
+ 1038               		.loc 1 121 0
+ 1039 0080 01F4      		brne .L57
+ 125:ButtonPadControllerSPI_v15.c **** 	fill16(greenf, 0x00);
+ 1040               		.loc 1 125 0
+ 1041 0082 60E0      		ldi r22,0
+ 1042 0084 80E0      		ldi r24,lo8(redf)
+ 1043 0086 90E0      		ldi r25,hi8(redf)
+ 1044 0088 0E94 0000 		call fill16
+ 1045               	.LVL76:
+ 126:ButtonPadControllerSPI_v15.c **** 	fill16(bluef, 0x00);
+ 1046               		.loc 1 126 0
+ 1047 008c 60E0      		ldi r22,0
+ 1048 008e 80E0      		ldi r24,lo8(greenf)
+ 1049 0090 90E0      		ldi r25,hi8(greenf)
+ 1050 0092 0E94 0000 		call fill16
+ 1051               	.LVL77:
+ 127:ButtonPadControllerSPI_v15.c **** 	redf[NUMBER_OF_BOARDS-1]=0xff;
+ 1052               		.loc 1 127 0
+ 1053 0096 60E0      		ldi r22,0
+ 1054 0098 80E0      		ldi r24,lo8(bluef)
+ 1055 009a 90E0      		ldi r25,hi8(bluef)
+ 1056 009c 0E94 0000 		call fill16
+ 1057               	.LVL78:
+ 128:ButtonPadControllerSPI_v15.c **** 	greenf[NUMBER_OF_BOARDS-1]=0xff;
+ 1058               		.loc 1 128 0
+ 1059 00a0 8091 0000 		lds r24,NUMBER_OF_BOARDS
+ 1060 00a4 90E0      		ldi r25,0
+ 1061 00a6 0197      		sbiw r24,1
+ 1062 00a8 FC01      		movw r30,r24
+ 1063 00aa E050      		subi r30,lo8(-(redf))
+ 1064 00ac F040      		sbci r31,hi8(-(redf))
+ 1065 00ae 2FEF      		ldi r18,lo8(-1)
+ 1066 00b0 2083      		st Z,r18
+ 129:ButtonPadControllerSPI_v15.c **** 	bluef[NUMBER_OF_BOARDS-1]=0xff;
+ 1067               		.loc 1 129 0
+ 1068 00b2 FC01      		movw r30,r24
+ 1069 00b4 E050      		subi r30,lo8(-(greenf))
+ 1070 00b6 F040      		sbci r31,hi8(-(greenf))
+ 1071 00b8 2083      		st Z,r18
+ 130:ButtonPadControllerSPI_v15.c **** 	
+ 1072               		.loc 1 130 0
+ 1073 00ba FC01      		movw r30,r24
+ 1074 00bc E050      		subi r30,lo8(-(bluef))
+ 1075 00be F040      		sbci r31,hi8(-(bluef))
+ 1076 00c0 2083      		st Z,r18
+ 1077               	.LBB6:
+ 171:ButtonPadControllerSPI_v15.c **** 				
+ 1078               		.loc 1 171 0
+ 1079 00c2 C1E0      		ldi r28,lo8(1)
+ 1080 00c4 D0E0      		ldi r29,0
+ 1081               	.LVL79:
+ 1082               	.L58:
+ 1083               	.LBE6:
+ 135:ButtonPadControllerSPI_v15.c **** 			display();
+ 1084               		.loc 1 135 0
+ 1085 00c6 8091 0000 		lds r24,board_complete
+ 1086 00ca 9091 0000 		lds r25,board_complete+1
+ 1087 00ce 892B      		or r24,r25
+ 1088 00d0 01F4      		brne .L64
+ 135:ButtonPadControllerSPI_v15.c **** 			display();
+ 1089               		.loc 1 135 0 is_stmt 0 discriminator 1
+ 1090 00d2 8091 0000 		lds r24,enter_command_mode
+ 1091 00d6 9091 0000 		lds r25,enter_command_mode+1
+ 1092 00da 0297      		sbiw r24,2
+ 1093 00dc 01F0      		breq .L64
+ 136:ButtonPadControllerSPI_v15.c **** 			if(boards_received==0)for(int i=0; i<NUMBER_OF_LEDS; i++)outgoing_board[i+48]=buttons[i];
+ 1094               		.loc 1 136 0 is_stmt 1
+ 1095 00de 0E94 0000 		call display
+ 1096               	.LVL80:
+ 137:ButtonPadControllerSPI_v15.c **** 			
+ 1097               		.loc 1 137 0
+ 1098 00e2 8091 0000 		lds r24,boards_received
+ 1099 00e6 9091 0000 		lds r25,boards_received+1
+ 1100 00ea 892B      		or r24,r25
+ 1101 00ec 01F0      		breq .L59
+ 1102               	.L63:
+ 140:ButtonPadControllerSPI_v15.c **** 				cli();
+ 1103               		.loc 1 140 0
+ 1104 00ee 1A99      		sbic 0x3,2
+ 1105 00f0 00C0      		rjmp .L58
+ 141:ButtonPadControllerSPI_v15.c **** 				bit_count_input=0;
+ 1106               		.loc 1 141 0
+ 1107               	/* #APP */
+ 1108               	 ;  141 "ButtonPadControllerSPI_v15.c" 1
+ 1109 00f2 F894      		cli
+ 1110               	 ;  0 "" 2
+ 142:ButtonPadControllerSPI_v15.c **** 				bit_count_output=0;
+ 1111               		.loc 1 142 0
+ 1112               	/* #NOAPP */
+ 1113 00f4 1092 0000 		sts bit_count_input+1,__zero_reg__
+ 1114 00f8 1092 0000 		sts bit_count_input,__zero_reg__
+ 143:ButtonPadControllerSPI_v15.c **** 				incoming_board_index=0;
+ 1115               		.loc 1 143 0
+ 1116 00fc 1092 0000 		sts bit_count_output+1,__zero_reg__
+ 1117 0100 1092 0000 		sts bit_count_output,__zero_reg__
+ 144:ButtonPadControllerSPI_v15.c **** 				outgoing_board_index=0;
+ 1118               		.loc 1 144 0
+ 1119 0104 1092 0000 		sts incoming_board_index+1,__zero_reg__
+ 1120 0108 1092 0000 		sts incoming_board_index,__zero_reg__
+ 145:ButtonPadControllerSPI_v15.c **** 				sei();
+ 1121               		.loc 1 145 0
+ 1122 010c 1092 0000 		sts outgoing_board_index+1,__zero_reg__
+ 1123 0110 1092 0000 		sts outgoing_board_index,__zero_reg__
+ 1124 0114 00C0      		rjmp .L102
+ 1125               	.L59:
+ 1126 0116 E0E0      		ldi r30,lo8(buttons)
+ 1127 0118 F0E0      		ldi r31,hi8(buttons)
+ 1128 011a A0E0      		ldi r26,lo8(outgoing_board+48)
+ 1129 011c B0E0      		ldi r27,hi8(outgoing_board+48)
+ 1130               	.L62:
+ 1131               	.LVL81:
+ 1132               	.LBB7:
+ 137:ButtonPadControllerSPI_v15.c **** 			
+ 1133               		.loc 1 137 0 discriminator 4
+ 1134 011e 8191      		ld r24,Z+
+ 1135               	.LVL82:
+ 1136 0120 8D93      		st X+,r24
+ 1137               	.LVL83:
+ 1138 0122 80E0      		ldi r24,hi8(buttons+16)
+ 1139 0124 E030      		cpi r30,lo8(buttons+16)
+ 1140 0126 F807      		cpc r31,r24
+ 1141 0128 01F4      		brne .L62
+ 1142 012a 00C0      		rjmp .L63
+ 1143               	.LVL84:
+ 1144               	.L64:
+ 1145               	.LBE7:
+ 149:ButtonPadControllerSPI_v15.c **** 		if(board_complete){	
+ 1146               		.loc 1 149 0
+ 1147               	/* #APP */
+ 1148               	 ;  149 "ButtonPadControllerSPI_v15.c" 1
+ 1149 012c F894      		cli
+ 1150               	 ;  0 "" 2
+ 150:ButtonPadControllerSPI_v15.c **** 			board_complete=0;
+ 1151               		.loc 1 150 0
+ 1152               	/* #NOAPP */
+ 1153 012e 8091 0000 		lds r24,board_complete
+ 1154 0132 9091 0000 		lds r25,board_complete+1
+ 1155 0136 892B      		or r24,r25
+ 1156 0138 01F0      		breq .+2
+ 1157 013a 00C0      		rjmp .L103
+ 1158               	.L67:
+ 165:ButtonPadControllerSPI_v15.c **** 			//Get the command id from the SPI bus
+ 1159               		.loc 1 165 0
+ 1160 013c 8091 0000 		lds r24,enter_command_mode
+ 1161 0140 9091 0000 		lds r25,enter_command_mode+1
+ 1162 0144 0297      		sbiw r24,2
+ 1163 0146 01F4      		brne .L74
+ 1164 0148 80E0      		ldi r24,0
+ 1165 014a 90E0      		ldi r25,0
+ 1166               	.L75:
+ 1167               	.LBB8:
+ 168:ButtonPadControllerSPI_v15.c **** 				
+ 1168               		.loc 1 168 0 discriminator 1
+ 1169 014c 1D9B      		sbis 0x3,5
+ 1170 014e 00C0      		rjmp .L75
+ 1171 0150 6091 0000 		lds r22,command_id
+ 170:ButtonPadControllerSPI_v15.c **** 				else command_id &= ~(1<<id_bit);
+ 1172               		.loc 1 170 0
+ 1173 0154 1C9B      		sbis 0x3,4
+ 1174 0156 00C0      		rjmp .L76
+ 170:ButtonPadControllerSPI_v15.c **** 				else command_id &= ~(1<<id_bit);
+ 1175               		.loc 1 170 0 is_stmt 0 discriminator 1
+ 1176 0158 AE01      		movw r20,r28
+ 1177 015a 082E      		mov r0,r24
+ 1178 015c 00C0      		rjmp 2f
+ 1179               		1:
+ 1180 015e 440F      		lsl r20
+ 1181               		2:
+ 1182 0160 0A94      		dec r0
+ 1183 0162 02F4      		brpl 1b
+ 1184 0164 462B      		or r20,r22
+ 1185 0166 4093 0000 		sts command_id,r20
+ 1186               	.L78:
+ 173:ButtonPadControllerSPI_v15.c **** 			}
+ 1187               		.loc 1 173 0 is_stmt 1 discriminator 1
+ 1188 016a 1D99      		sbic 0x3,5
+ 1189 016c 00C0      		rjmp .L78
+ 167:ButtonPadControllerSPI_v15.c **** 				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+ 1190               		.loc 1 167 0 discriminator 2
+ 1191 016e 0196      		adiw r24,1
+ 1192               	.LVL85:
+ 1193 0170 8830      		cpi r24,8
+ 1194 0172 9105      		cpc r25,__zero_reg__
+ 1195 0174 01F4      		brne .L75
+ 1196 0176 80E0      		ldi r24,0
+ 1197 0178 90E0      		ldi r25,0
+ 1198               	.LVL86:
+ 1199               	.L80:
+ 1200               	.LBE8:
+ 1201               	.LBB9:
+ 178:ButtonPadControllerSPI_v15.c **** 				
+ 1202               		.loc 1 178 0 discriminator 1
+ 1203 017a 1D9B      		sbis 0x3,5
+ 1204 017c 00C0      		rjmp .L80
+ 1205 017e 6091 0000 		lds r22,command_byte
+ 180:ButtonPadControllerSPI_v15.c **** 				else command_byte &= ~(1<<data_bit);
+ 1206               		.loc 1 180 0
+ 1207 0182 1C9B      		sbis 0x3,4
+ 1208 0184 00C0      		rjmp .L81
+ 180:ButtonPadControllerSPI_v15.c **** 				else command_byte &= ~(1<<data_bit);
+ 1209               		.loc 1 180 0 is_stmt 0 discriminator 1
+ 1210 0186 AE01      		movw r20,r28
+ 1211 0188 082E      		mov r0,r24
+ 1212 018a 00C0      		rjmp 2f
+ 1213               		1:
+ 1214 018c 440F      		lsl r20
+ 1215               		2:
+ 1216 018e 0A94      		dec r0
+ 1217 0190 02F4      		brpl 1b
+ 1218 0192 462B      		or r20,r22
+ 1219 0194 4093 0000 		sts command_byte,r20
+ 1220               	.L83:
+ 183:ButtonPadControllerSPI_v15.c **** 			}
+ 1221               		.loc 1 183 0 is_stmt 1 discriminator 1
+ 1222 0198 1D99      		sbic 0x3,5
+ 1223 019a 00C0      		rjmp .L83
+ 177:ButtonPadControllerSPI_v15.c **** 				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+ 1224               		.loc 1 177 0 discriminator 2
+ 1225 019c 0196      		adiw r24,1
+ 1226               	.LVL87:
+ 1227 019e 8830      		cpi r24,8
+ 1228 01a0 9105      		cpc r25,__zero_reg__
+ 1229 01a2 01F4      		brne .L80
+ 1230               	.LBE9:
+ 185:ButtonPadControllerSPI_v15.c **** 		}
+ 1231               		.loc 1 185 0
+ 1232 01a4 1092 0000 		sts enter_command_mode+1,__zero_reg__
+ 1233 01a8 1092 0000 		sts enter_command_mode,__zero_reg__
+ 1234               	.LVL88:
+ 1235               	.L74:
+ 188:ButtonPadControllerSPI_v15.c **** 			NUMBER_OF_BOARDS=command_byte;
+ 1236               		.loc 1 188 0
+ 1237 01ac 8091 0000 		lds r24,command_id
+ 1238 01b0 8130      		cpi r24,lo8(1)
+ 1239 01b2 01F4      		brne .L102
+ 189:ButtonPadControllerSPI_v15.c **** 			write_to_EEPROM(NUMBER_OF_BOARDS_ADDRESS, NUMBER_OF_BOARDS);
+ 1240               		.loc 1 189 0
+ 1241 01b4 6091 0000 		lds r22,command_byte
+ 1242 01b8 6093 0000 		sts NUMBER_OF_BOARDS,r22
+ 190:ButtonPadControllerSPI_v15.c **** 		}
+ 1243               		.loc 1 190 0
+ 1244 01bc 80E0      		ldi r24,0
+ 1245 01be 90E0      		ldi r25,0
+ 1246 01c0 0E94 0000 		call write_to_EEPROM
+ 1247               	.LVL89:
+ 1248               	.L102:
+ 146:ButtonPadControllerSPI_v15.c **** 			}
+ 1249               		.loc 1 146 0
+ 1250               	/* #APP */
+ 1251               	 ;  146 "ButtonPadControllerSPI_v15.c" 1
+ 1252 01c4 7894      		sei
+ 1253               	 ;  0 "" 2
+ 1254               	/* #NOAPP */
+ 1255 01c6 00C0      		rjmp .L58
+ 1256               	.L103:
+ 151:ButtonPadControllerSPI_v15.c **** 			boards_received+=1;
+ 1257               		.loc 1 151 0
+ 1258 01c8 1092 0000 		sts board_complete+1,__zero_reg__
+ 1259 01cc 1092 0000 		sts board_complete,__zero_reg__
+ 152:ButtonPadControllerSPI_v15.c **** 			
+ 1260               		.loc 1 152 0
+ 1261 01d0 8091 0000 		lds r24,boards_received
+ 1262 01d4 9091 0000 		lds r25,boards_received+1
+ 1263 01d8 0196      		adiw r24,1
+ 1264 01da 9093 0000 		sts boards_received+1,r25
+ 1265 01de 8093 0000 		sts boards_received,r24
+ 155:ButtonPadControllerSPI_v15.c **** 				for(int i=0; i<NUMBER_OF_LEDS; i++)redf[i]=incoming_board[i];
+ 1266               		.loc 1 155 0
+ 1267 01e2 2091 0000 		lds r18,boards_received
+ 1268 01e6 3091 0000 		lds r19,boards_received+1
+ 1269 01ea 8091 0000 		lds r24,NUMBER_OF_BOARDS
+ 1270 01ee 90E0      		ldi r25,0
+ 1271 01f0 E0E0      		ldi r30,lo8(incoming_board)
+ 1272 01f2 F0E0      		ldi r31,hi8(incoming_board)
+ 1273 01f4 2817      		cp r18,r24
+ 1274 01f6 3907      		cpc r19,r25
+ 1275 01f8 04F0      		brlt .L68
+ 1276 01fa A0E0      		ldi r26,lo8(redf)
+ 1277 01fc B0E0      		ldi r27,hi8(redf)
+ 1278               	.L69:
+ 1279               	.LVL90:
+ 1280               	.LBB10:
+ 156:ButtonPadControllerSPI_v15.c **** 				for(int i=0; i<NUMBER_OF_LEDS; i++)greenf[i]=incoming_board[i+16];
+ 1281               		.loc 1 156 0 discriminator 3
+ 1282 01fe 8191      		ld r24,Z+
+ 1283               	.LVL91:
+ 1284 0200 8D93      		st X+,r24
+ 1285               	.LVL92:
+ 1286 0202 80E0      		ldi r24,hi8(incoming_board+16)
+ 1287 0204 E030      		cpi r30,lo8(incoming_board+16)
+ 1288 0206 F807      		cpc r31,r24
+ 1289 0208 01F4      		brne .L69
+ 1290 020a A0E0      		ldi r26,lo8(incoming_board+16)
+ 1291 020c B0E0      		ldi r27,hi8(incoming_board+16)
+ 1292 020e E0E0      		ldi r30,lo8(greenf)
+ 1293 0210 F0E0      		ldi r31,hi8(greenf)
+ 1294               	.LVL93:
+ 1295               	.L70:
+ 1296               	.LBE10:
+ 1297               	.LBB11:
+ 157:ButtonPadControllerSPI_v15.c **** 				for(int i=0; i<NUMBER_OF_LEDS; i++)bluef[i]=incoming_board[i+32];
+ 1298               		.loc 1 157 0 discriminator 3
+ 1299 0212 8D91      		ld r24,X+
+ 1300               	.LVL94:
+ 1301 0214 8193      		st Z+,r24
+ 1302               	.LVL95:
+ 1303 0216 80E0      		ldi r24,hi8(greenf+16)
+ 1304 0218 E030      		cpi r30,lo8(greenf+16)
+ 1305 021a F807      		cpc r31,r24
+ 1306 021c 01F4      		brne .L70
+ 1307 021e A0E0      		ldi r26,lo8(incoming_board+32)
+ 1308 0220 B0E0      		ldi r27,hi8(incoming_board+32)
+ 1309               	.LVL96:
+ 1310 0222 E0E0      		ldi r30,lo8(bluef)
+ 1311 0224 F0E0      		ldi r31,hi8(bluef)
+ 1312               	.L71:
+ 1313               	.LVL97:
+ 1314               	.LBE11:
+ 1315               	.LBB12:
+ 158:ButtonPadControllerSPI_v15.c **** 				boards_received=0;
+ 1316               		.loc 1 158 0 discriminator 3
+ 1317 0226 8D91      		ld r24,X+
+ 1318               	.LVL98:
+ 1319 0228 8193      		st Z+,r24
+ 1320               	.LVL99:
+ 1321 022a 80E0      		ldi r24,hi8(bluef+16)
+ 1322 022c E030      		cpi r30,lo8(bluef+16)
+ 1323 022e F807      		cpc r31,r24
+ 1324 0230 01F4      		brne .L71
+ 1325               	.LBE12:
+ 159:ButtonPadControllerSPI_v15.c **** 			}
+ 1326               		.loc 1 159 0
+ 1327 0232 1092 0000 		sts boards_received+1,__zero_reg__
+ 1328 0236 1092 0000 		sts boards_received,__zero_reg__
+ 1329 023a 00C0      		rjmp .L67
+ 1330               	.LVL100:
+ 1331               	.L68:
+ 1332 023c A0E0      		ldi r26,lo8(outgoing_board)
+ 1333 023e B0E0      		ldi r27,hi8(outgoing_board)
+ 1334               	.L72:
+ 1335               	.LVL101:
+ 1336               	.LBB13:
+ 162:ButtonPadControllerSPI_v15.c **** 		}
+ 1337               		.loc 1 162 0 discriminator 3
+ 1338 0240 8191      		ld r24,Z+
+ 1339               	.LVL102:
+ 1340 0242 8D93      		st X+,r24
+ 1341               	.LVL103:
+ 1342 0244 80E0      		ldi r24,hi8(incoming_board+64)
+ 1343 0246 E030      		cpi r30,lo8(incoming_board+64)
+ 1344 0248 F807      		cpc r31,r24
+ 1345 024a 01F4      		brne .L72
+ 1346 024c 00C0      		rjmp .L67
+ 1347               	.LVL104:
+ 1348               	.L76:
+ 1349               	.LBE13:
+ 1350               	.LBB14:
+ 171:ButtonPadControllerSPI_v15.c **** 				
+ 1351               		.loc 1 171 0
+ 1352 024e 9E01      		movw r18,r28
+ 1353 0250 082E      		mov r0,r24
+ 1354 0252 00C0      		rjmp 2f
+ 1355               		1:
+ 1356 0254 220F      		lsl r18
+ 1357               		2:
+ 1358 0256 0A94      		dec r0
+ 1359 0258 02F4      		brpl 1b
+ 1360 025a 2095      		com r18
+ 1361 025c 2623      		and r18,r22
+ 1362 025e 2093 0000 		sts command_id,r18
+ 1363 0262 00C0      		rjmp .L78
+ 1364               	.L81:
+ 1365               	.LBE14:
+ 1366               	.LBB15:
+ 181:ButtonPadControllerSPI_v15.c **** 				
+ 1367               		.loc 1 181 0
+ 1368 0264 9E01      		movw r18,r28
+ 1369 0266 082E      		mov r0,r24
+ 1370 0268 00C0      		rjmp 2f
+ 1371               		1:
+ 1372 026a 220F      		lsl r18
+ 1373               		2:
+ 1374 026c 0A94      		dec r0
+ 1375 026e 02F4      		brpl 1b
+ 1376 0270 2095      		com r18
+ 1377 0272 2623      		and r18,r22
+ 1378 0274 2093 0000 		sts command_byte,r18
+ 1379 0278 00C0      		rjmp .L83
+ 1380               	.LBE15:
+ 1381               		.cfi_endproc
+ 1382               	.LFE5:
+ 1384               		.comm	incoming_board,64,1
+ 1385               		.comm	outgoing_board,64,1
+ 1386               		.comm	buttons,16,1
+ 1387               		.comm	greenf,16,1
+ 1388               		.comm	bluef,16,1
+ 1389               		.comm	redf,16,1
+ 1390               	.global	NUMBER_OF_BOARDS
+ 1391               		.data
+ 1394               	NUMBER_OF_BOARDS:
+ 1395 0000 01        		.byte	1
+ 1396               		.comm	command_byte,1,1
+ 1397               		.comm	command_id,1,1
+ 1398               	.global	enter_command_mode
+ 1399               		.section .bss
+ 1402               	enter_command_mode:
+ 1403 0000 0000      		.zero	2
+ 1404               	.global	bit_count_output
+ 1407               	bit_count_output:
+ 1408 0002 0000      		.zero	2
+ 1409               	.global	bit_count_input
+ 1412               	bit_count_input:
+ 1413 0004 0000      		.zero	2
+ 1414               	.global	board_complete
+ 1417               	board_complete:
+ 1418 0006 0000      		.zero	2
+ 1419               	.global	outgoing_board_index
+ 1422               	outgoing_board_index:
+ 1423 0008 0000      		.zero	2
+ 1424               	.global	boards_received
+ 1427               	boards_received:
+ 1428 000a 0000      		.zero	2
+ 1429               	.global	incoming_board_index
+ 1432               	incoming_board_index:
+ 1433 000c 0000      		.zero	2
+ 1434               	.global	frame_num
+ 1437               	frame_num:
+ 1438 000e 0000      		.zero	2
+ 1439               	.global	row
+ 1442               	row:
+ 1443 0010 00        		.zero	1
+ 1444               		.text
+ 1445               	.Letext0:
+ 1446               		.file 2 "/usr/lib/avr/include/stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 ButtonPadControllerSPI_v15.c
+     /tmp/ccg8l4Sl.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccg8l4Sl.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccg8l4Sl.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccg8l4Sl.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccg8l4Sl.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccg8l4Sl.s:12     .text:0000000000000000 __vector_3
+     /tmp/ccg8l4Sl.s:1402   .bss:0000000000000000 enter_command_mode
+     /tmp/ccg8l4Sl.s:1412   .bss:0000000000000004 bit_count_input
+     /tmp/ccg8l4Sl.s:1432   .bss:000000000000000c incoming_board_index
+                            *COM*:0000000000000040 incoming_board
+     /tmp/ccg8l4Sl.s:1422   .bss:0000000000000008 outgoing_board_index
+                            *COM*:0000000000000040 outgoing_board
+     /tmp/ccg8l4Sl.s:1407   .bss:0000000000000002 bit_count_output
+     /tmp/ccg8l4Sl.s:1417   .bss:0000000000000006 board_complete
+     /tmp/ccg8l4Sl.s:266    .text:00000000000001a0 fill16
+     /tmp/ccg8l4Sl.s:300    .text:00000000000001b8 delay_short
+     /tmp/ccg8l4Sl.s:351    .text:00000000000001cc clock_byte
+     /tmp/ccg8l4Sl.s:469    .text:0000000000000248 newcolor
+     /tmp/ccg8l4Sl.s:568    .text:00000000000002b4 display
+     /tmp/ccg8l4Sl.s:1442   .bss:0000000000000010 row
+     /tmp/ccg8l4Sl.s:1437   .bss:000000000000000e frame_num
+                            *COM*:0000000000000010 greenf
+                            *COM*:0000000000000010 bluef
+                            *COM*:0000000000000010 redf
+                            *COM*:0000000000000010 buttons
+     /tmp/ccg8l4Sl.s:794    .text:00000000000003fc write_to_EEPROM
+     /tmp/ccg8l4Sl.s:822    .text:000000000000040c read_from_EEPROM
+     /tmp/ccg8l4Sl.s:850    .text:000000000000041a ioinit
+     /tmp/ccg8l4Sl.s:1394   .data:0000000000000000 NUMBER_OF_BOARDS
+     /tmp/ccg8l4Sl.s:939    .text.startup:0000000000000000 main
+     /tmp/ccg8l4Sl.s:1427   .bss:000000000000000a boards_received
+                            *COM*:0000000000000001 command_id
+                            *COM*:0000000000000001 command_byte
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss

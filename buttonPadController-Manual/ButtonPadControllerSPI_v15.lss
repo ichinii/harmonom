@@ -1,0 +1,1323 @@
+
+ButtonPadControllerSPI_v15.elf:     Dateiformat elf32-avr
+
+Sektionen:
+Idx Name          Größe     VMA       LMA       Datei-Off Ausr.
+  0 .data         00000002  00800100  000007a2  00000836  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         000007a2  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .bss          000000d3  00800102  00800102  00000838  2**0
+                  ALLOC
+  3 .comment      00000011  00000000  00000000  00000838  2**0
+                  CONTENTS, READONLY
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000084c  2**2
+                  CONTENTS, READONLY
+  5 .debug_aranges 00000028  00000000  00000000  00000888  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   000007a8  00000000  00000000  000008b0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 00000235  00000000  00000000  00001058  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   000001fc  00000000  00000000  0000128d  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000124  00000000  00000000  0000148c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    000002d7  00000000  00000000  000015b0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    00000646  00000000  00000000  00001887  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_ranges 00000050  00000000  00000000  00001ecd  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 34 00 	jmp	0x68	; 0x68 <__ctors_end>
+   4:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+   8:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+   c:	0c 94 53 00 	jmp	0xa6	; 0xa6 <__vector_3>
+  10:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  14:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  18:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  1c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  20:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  24:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  28:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  2c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  30:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  34:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  38:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  3c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  40:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  44:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  48:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  4c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  50:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  54:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  58:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  5c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  60:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  64:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+
+00000068 <__ctors_end>:
+  68:	11 24       	eor	r1, r1
+  6a:	1f be       	out	0x3f, r1	; 63
+  6c:	cf ef       	ldi	r28, 0xFF	; 255
+  6e:	d4 e0       	ldi	r29, 0x04	; 4
+  70:	de bf       	out	0x3e, r29	; 62
+  72:	cd bf       	out	0x3d, r28	; 61
+
+00000074 <__do_copy_data>:
+  74:	11 e0       	ldi	r17, 0x01	; 1
+  76:	a0 e0       	ldi	r26, 0x00	; 0
+  78:	b1 e0       	ldi	r27, 0x01	; 1
+  7a:	e2 ea       	ldi	r30, 0xA2	; 162
+  7c:	f7 e0       	ldi	r31, 0x07	; 7
+  7e:	02 c0       	rjmp	.+4      	; 0x84 <__do_copy_data+0x10>
+  80:	05 90       	lpm	r0, Z+
+  82:	0d 92       	st	X+, r0
+  84:	a2 30       	cpi	r26, 0x02	; 2
+  86:	b1 07       	cpc	r27, r17
+  88:	d9 f7       	brne	.-10     	; 0x80 <__do_copy_data+0xc>
+
+0000008a <__do_clear_bss>:
+  8a:	21 e0       	ldi	r18, 0x01	; 1
+  8c:	a2 e0       	ldi	r26, 0x02	; 2
+  8e:	b1 e0       	ldi	r27, 0x01	; 1
+  90:	01 c0       	rjmp	.+2      	; 0x94 <.do_clear_bss_start>
+
+00000092 <.do_clear_bss_loop>:
+  92:	1d 92       	st	X+, r1
+
+00000094 <.do_clear_bss_start>:
+  94:	a5 3d       	cpi	r26, 0xD5	; 213
+  96:	b2 07       	cpc	r27, r18
+  98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
+  9a:	0e 94 92 02 	call	0x524	; 0x524 <main>
+  9e:	0c 94 cf 03 	jmp	0x79e	; 0x79e <_exit>
+
+000000a2 <__bad_interrupt>:
+  a2:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+000000a6 <__vector_3>:
+//the display frames (redf, greenf, bluef) or the outgoing_board buffer depending on how many boards are left to be transmitted.
+unsigned char incoming_board[NUMBER_OF_LEDS*4];
+
+
+ISR (PCINT0_vect)
+{
+  a6:	1f 92       	push	r1
+  a8:	0f 92       	push	r0
+  aa:	0f b6       	in	r0, 0x3f	; 63
+  ac:	0f 92       	push	r0
+  ae:	11 24       	eor	r1, r1
+  b0:	2f 93       	push	r18
+  b2:	3f 93       	push	r19
+  b4:	4f 93       	push	r20
+  b6:	5f 93       	push	r21
+  b8:	8f 93       	push	r24
+  ba:	9f 93       	push	r25
+  bc:	ef 93       	push	r30
+  be:	ff 93       	push	r31
+	
+	cli();
+  c0:	f8 94       	cli
+
+	if(PINB & (1<<SPI_SCLK)){
+  c2:	1d 9b       	sbis	0x03, 5	; 3
+  c4:	55 c0       	rjmp	.+170    	; 0x170 <__vector_3+0xca>
+		//Make sure that the Chip Select line is high.
+		if(PINB & (1<<SPI_CS)){
+  c6:	1a 9b       	sbis	0x03, 2	; 3
+  c8:	50 c0       	rjmp	.+160    	; 0x16a <__vector_3+0xc4>
+			enter_command_mode=0;
+  ca:	10 92 03 01 	sts	0x0103, r1
+  ce:	10 92 02 01 	sts	0x0102, r1
+			//If the clock is high than there is valid data. Put the incoming bit into the color frame
+			if(PINB & (1<<SPI_IN))incoming_board[incoming_board_index]|=(1<<bit_count_input++);	//If the recv. bit is high, set the bit in the LED array
+  d2:	1c 9b       	sbis	0x03, 4	; 3
+  d4:	19 c0       	rjmp	.+50     	; 0x108 <__vector_3+0x62>
+  d6:	20 91 06 01 	lds	r18, 0x0106
+  da:	30 91 07 01 	lds	r19, 0x0107
+  de:	c9 01       	movw	r24, r18
+  e0:	01 96       	adiw	r24, 0x01	; 1
+  e2:	90 93 07 01 	sts	0x0107, r25
+  e6:	80 93 06 01 	sts	0x0106, r24
+  ea:	e0 91 0e 01 	lds	r30, 0x010E
+  ee:	f0 91 0f 01 	lds	r31, 0x010F
+  f2:	ed 5a       	subi	r30, 0xAD	; 173
+  f4:	fe 4f       	sbci	r31, 0xFE	; 254
+  f6:	81 e0       	ldi	r24, 0x01	; 1
+  f8:	90 e0       	ldi	r25, 0x00	; 0
+  fa:	01 c0       	rjmp	.+2      	; 0xfe <__vector_3+0x58>
+  fc:	88 0f       	add	r24, r24
+  fe:	2a 95       	dec	r18
+ 100:	ea f7       	brpl	.-6      	; 0xfc <__vector_3+0x56>
+ 102:	90 81       	ld	r25, Z
+ 104:	89 2b       	or	r24, r25
+ 106:	1b c0       	rjmp	.+54     	; 0x13e <__vector_3+0x98>
+			else incoming_board[incoming_board_index]&=~(1<<bit_count_input++);			
+ 108:	20 91 06 01 	lds	r18, 0x0106
+ 10c:	30 91 07 01 	lds	r19, 0x0107
+ 110:	c9 01       	movw	r24, r18
+ 112:	01 96       	adiw	r24, 0x01	; 1
+ 114:	90 93 07 01 	sts	0x0107, r25
+ 118:	80 93 06 01 	sts	0x0106, r24
+ 11c:	e0 91 0e 01 	lds	r30, 0x010E
+ 120:	f0 91 0f 01 	lds	r31, 0x010F
+ 124:	ed 5a       	subi	r30, 0xAD	; 173
+ 126:	fe 4f       	sbci	r31, 0xFE	; 254
+ 128:	81 e0       	ldi	r24, 0x01	; 1
+ 12a:	90 e0       	ldi	r25, 0x00	; 0
+ 12c:	02 c0       	rjmp	.+4      	; 0x132 <__vector_3+0x8c>
+ 12e:	88 0f       	add	r24, r24
+ 130:	99 1f       	adc	r25, r25
+ 132:	2a 95       	dec	r18
+ 134:	e2 f7       	brpl	.-8      	; 0x12e <__vector_3+0x88>
+ 136:	80 95       	com	r24
+ 138:	90 95       	com	r25
+ 13a:	90 81       	ld	r25, Z
+ 13c:	89 23       	and	r24, r25
+ 13e:	80 83       	st	Z, r24
+			
+			if(bit_count_input >= COLOR_BITS){
+ 140:	80 91 06 01 	lds	r24, 0x0106
+ 144:	90 91 07 01 	lds	r25, 0x0107
+ 148:	08 97       	sbiw	r24, 0x08	; 8
+ 14a:	0c f4       	brge	.+2      	; 0x14e <__vector_3+0xa8>
+ 14c:	59 c0       	rjmp	.+178    	; 0x200 <__vector_3+0x15a>
+				bit_count_input=0;
+ 14e:	10 92 07 01 	sts	0x0107, r1
+ 152:	10 92 06 01 	sts	0x0106, r1
+				incoming_board_index+=1;
+ 156:	80 91 0e 01 	lds	r24, 0x010E
+ 15a:	90 91 0f 01 	lds	r25, 0x010F
+ 15e:	01 96       	adiw	r24, 0x01	; 1
+ 160:	90 93 0f 01 	sts	0x010F, r25
+ 164:	80 93 0e 01 	sts	0x010E, r24
+ 168:	4b c0       	rjmp	.+150    	; 0x200 <__vector_3+0x15a>
+			}
+		}
+		//If the chip select line is low and the data line is high, we may be trying to get into "Command Mode."
+		else enter_command_mode=1;
+ 16a:	81 e0       	ldi	r24, 0x01	; 1
+ 16c:	90 e0       	ldi	r25, 0x00	; 0
+ 16e:	3f c0       	rjmp	.+126    	; 0x1ee <__vector_3+0x148>
+	}
+	else{
+		if(PINB & (1<<SPI_CS)){
+ 170:	1a 9b       	sbis	0x03, 2	; 3
+ 172:	35 c0       	rjmp	.+106    	; 0x1de <__vector_3+0x138>
+			enter_command_mode=0;
+ 174:	10 92 03 01 	sts	0x0103, r1
+ 178:	10 92 02 01 	sts	0x0102, r1
+			//If the clock is low, than we can send data to the next board.
+			if((outgoing_board[outgoing_board_index]>>bit_count_output++)&0x01)sbi(PORTB, SPI_OUT);
+ 17c:	e0 91 0a 01 	lds	r30, 0x010A
+ 180:	f0 91 0b 01 	lds	r31, 0x010B
+ 184:	ec 56       	subi	r30, 0x6C	; 108
+ 186:	fe 4f       	sbci	r31, 0xFE	; 254
+ 188:	80 81       	ld	r24, Z
+ 18a:	90 e0       	ldi	r25, 0x00	; 0
+ 18c:	20 91 04 01 	lds	r18, 0x0104
+ 190:	30 91 05 01 	lds	r19, 0x0105
+ 194:	a9 01       	movw	r20, r18
+ 196:	4f 5f       	subi	r20, 0xFF	; 255
+ 198:	5f 4f       	sbci	r21, 0xFF	; 255
+ 19a:	50 93 05 01 	sts	0x0105, r21
+ 19e:	40 93 04 01 	sts	0x0104, r20
+ 1a2:	02 c0       	rjmp	.+4      	; 0x1a8 <__vector_3+0x102>
+ 1a4:	95 95       	asr	r25
+ 1a6:	87 95       	ror	r24
+ 1a8:	2a 95       	dec	r18
+ 1aa:	e2 f7       	brpl	.-8      	; 0x1a4 <__vector_3+0xfe>
+ 1ac:	80 ff       	sbrs	r24, 0
+ 1ae:	02 c0       	rjmp	.+4      	; 0x1b4 <__vector_3+0x10e>
+ 1b0:	2b 9a       	sbi	0x05, 3	; 5
+ 1b2:	01 c0       	rjmp	.+2      	; 0x1b6 <__vector_3+0x110>
+			else cbi(PORTB, SPI_OUT);
+ 1b4:	2b 98       	cbi	0x05, 3	; 5
+			
+			if(bit_count_output >= COLOR_BITS){
+ 1b6:	80 91 04 01 	lds	r24, 0x0104
+ 1ba:	90 91 05 01 	lds	r25, 0x0105
+ 1be:	08 97       	sbiw	r24, 0x08	; 8
+ 1c0:	fc f0       	brlt	.+62     	; 0x200 <__vector_3+0x15a>
+				bit_count_output=0;
+ 1c2:	10 92 05 01 	sts	0x0105, r1
+ 1c6:	10 92 04 01 	sts	0x0104, r1
+				outgoing_board_index+=1;
+ 1ca:	80 91 0a 01 	lds	r24, 0x010A
+ 1ce:	90 91 0b 01 	lds	r25, 0x010B
+ 1d2:	01 96       	adiw	r24, 0x01	; 1
+ 1d4:	90 93 0b 01 	sts	0x010B, r25
+ 1d8:	80 93 0a 01 	sts	0x010A, r24
+ 1dc:	11 c0       	rjmp	.+34     	; 0x200 <__vector_3+0x15a>
+			}
+		}
+		//Might be time to enter command mode!
+		else{
+			if(enter_command_mode==1)enter_command_mode=2;
+ 1de:	80 91 02 01 	lds	r24, 0x0102
+ 1e2:	90 91 03 01 	lds	r25, 0x0103
+ 1e6:	01 97       	sbiw	r24, 0x01	; 1
+ 1e8:	39 f4       	brne	.+14     	; 0x1f8 <__vector_3+0x152>
+ 1ea:	82 e0       	ldi	r24, 0x02	; 2
+ 1ec:	90 e0       	ldi	r25, 0x00	; 0
+ 1ee:	90 93 03 01 	sts	0x0103, r25
+ 1f2:	80 93 02 01 	sts	0x0102, r24
+ 1f6:	04 c0       	rjmp	.+8      	; 0x200 <__vector_3+0x15a>
+			else enter_command_mode=0;
+ 1f8:	10 92 03 01 	sts	0x0103, r1
+ 1fc:	10 92 02 01 	sts	0x0102, r1
+		}
+	}
+	
+	//Check to see if we've received a whole board of data
+	if(incoming_board_index >= (NUMBER_OF_LEDS*4)){
+ 200:	80 91 0e 01 	lds	r24, 0x010E
+ 204:	90 91 0f 01 	lds	r25, 0x010F
+ 208:	80 34       	cpi	r24, 0x40	; 64
+ 20a:	91 05       	cpc	r25, r1
+ 20c:	74 f0       	brlt	.+28     	; 0x22a <__vector_3+0x184>
+		incoming_board_index=0;
+ 20e:	10 92 0f 01 	sts	0x010F, r1
+ 212:	10 92 0e 01 	sts	0x010E, r1
+		outgoing_board_index=0;
+ 216:	10 92 0b 01 	sts	0x010B, r1
+ 21a:	10 92 0a 01 	sts	0x010A, r1
+		board_complete=1;
+ 21e:	81 e0       	ldi	r24, 0x01	; 1
+ 220:	90 e0       	ldi	r25, 0x00	; 0
+ 222:	90 93 09 01 	sts	0x0109, r25
+ 226:	80 93 08 01 	sts	0x0108, r24
+	}
+	
+	sei();
+ 22a:	78 94       	sei
+}
+ 22c:	ff 91       	pop	r31
+ 22e:	ef 91       	pop	r30
+ 230:	9f 91       	pop	r25
+ 232:	8f 91       	pop	r24
+ 234:	5f 91       	pop	r21
+ 236:	4f 91       	pop	r20
+ 238:	3f 91       	pop	r19
+ 23a:	2f 91       	pop	r18
+ 23c:	0f 90       	pop	r0
+ 23e:	0f be       	out	0x3f, r0	; 63
+ 240:	0f 90       	pop	r0
+ 242:	1f 90       	pop	r1
+ 244:	18 95       	reti
+
+00000246 <fill16>:
+}
+
+void fill16(volatile uint8_t* src, uint8_t fill)
+{
+    int i;
+    for (i = 0; i < 16; i++)
+ 246:	20 e0       	ldi	r18, 0x00	; 0
+ 248:	30 e0       	ldi	r19, 0x00	; 0
+ 24a:	fc 01       	movw	r30, r24
+ 24c:	e2 0f       	add	r30, r18
+ 24e:	f3 1f       	adc	r31, r19
+    {
+        src[i] = fill;
+ 250:	60 83       	st	Z, r22
+}
+
+void fill16(volatile uint8_t* src, uint8_t fill)
+{
+    int i;
+    for (i = 0; i < 16; i++)
+ 252:	2f 5f       	subi	r18, 0xFF	; 255
+ 254:	3f 4f       	sbci	r19, 0xFF	; 255
+ 256:	20 31       	cpi	r18, 0x10	; 16
+ 258:	31 05       	cpc	r19, r1
+ 25a:	b9 f7       	brne	.-18     	; 0x24a <fill16+0x4>
+    {
+        src[i] = fill;
+    }
+}
+ 25c:	08 95       	ret
+
+0000025e <delay_short>:
+}    
+
+//General short delays
+void delay_short(uint16_t x)
+{
+  for ( ; x > 0 ; x--){
+ 25e:	00 97       	sbiw	r24, 0x00	; 0
+ 260:	39 f0       	breq	.+14     	; 0x270 <delay_short+0x12>
+	...
+    for (char y = 0;  y <  5; y++){
+        asm volatile ("nop");
+ 26a:	00 00       	nop
+}    
+
+//General short delays
+void delay_short(uint16_t x)
+{
+  for ( ; x > 0 ; x--){
+ 26c:	01 97       	sbiw	r24, 0x01	; 1
+ 26e:	f7 cf       	rjmp	.-18     	; 0x25e <delay_short>
+ 270:	08 95       	ret
+
+00000272 <clock_byte>:
+
+//SUMMARY: Sends a row of color values to the board
+//Clocks out a 16-bit row_colors to the shift registers and enables them
+//Also opens drain for given row
+void clock_byte(volatile uint16_t row_colors, volatile uint8_t rowNum)
+{  	
+ 272:	cf 93       	push	r28
+ 274:	df 93       	push	r29
+ 276:	00 d0       	rcall	.+0      	; 0x278 <clock_byte+0x6>
+ 278:	1f 92       	push	r1
+ 27a:	cd b7       	in	r28, 0x3d	; 61
+ 27c:	de b7       	in	r29, 0x3e	; 62
+ 27e:	9a 83       	std	Y+2, r25	; 0x02
+ 280:	89 83       	std	Y+1, r24	; 0x01
+ 282:	6b 83       	std	Y+3, r22	; 0x03
+	for(int i = 0; i < 16; i++)
+ 284:	80 e0       	ldi	r24, 0x00	; 0
+ 286:	90 e0       	ldi	r25, 0x00	; 0
+    {
+        cbi(PORTC, SR_SCK);
+
+        if (row_colors & (1 << i))
+ 288:	41 e0       	ldi	r20, 0x01	; 1
+ 28a:	50 e0       	ldi	r21, 0x00	; 0
+//Also opens drain for given row
+void clock_byte(volatile uint16_t row_colors, volatile uint8_t rowNum)
+{  	
+	for(int i = 0; i < 16; i++)
+    {
+        cbi(PORTC, SR_SCK);
+ 28c:	40 98       	cbi	0x08, 0	; 8
+
+        if (row_colors & (1 << i))
+ 28e:	29 81       	ldd	r18, Y+1	; 0x01
+ 290:	3a 81       	ldd	r19, Y+2	; 0x02
+ 292:	ba 01       	movw	r22, r20
+ 294:	08 2e       	mov	r0, r24
+ 296:	02 c0       	rjmp	.+4      	; 0x29c <clock_byte+0x2a>
+ 298:	66 0f       	add	r22, r22
+ 29a:	77 1f       	adc	r23, r23
+ 29c:	0a 94       	dec	r0
+ 29e:	e2 f7       	brpl	.-8      	; 0x298 <clock_byte+0x26>
+ 2a0:	26 23       	and	r18, r22
+ 2a2:	37 23       	and	r19, r23
+ 2a4:	23 2b       	or	r18, r19
+ 2a6:	11 f0       	breq	.+4      	; 0x2ac <clock_byte+0x3a>
+            sbi(PORTC, SR_DATA);
+ 2a8:	41 9a       	sbi	0x08, 1	; 8
+ 2aa:	01 c0       	rjmp	.+2      	; 0x2ae <clock_byte+0x3c>
+        else
+            cbi(PORTC, SR_DATA);
+ 2ac:	41 98       	cbi	0x08, 1	; 8
+    
+        sbi(PORTC, SR_SCK);
+ 2ae:	40 9a       	sbi	0x08, 0	; 8
+//SUMMARY: Sends a row of color values to the board
+//Clocks out a 16-bit row_colors to the shift registers and enables them
+//Also opens drain for given row
+void clock_byte(volatile uint16_t row_colors, volatile uint8_t rowNum)
+{  	
+	for(int i = 0; i < 16; i++)
+ 2b0:	01 96       	adiw	r24, 0x01	; 1
+ 2b2:	80 31       	cpi	r24, 0x10	; 16
+ 2b4:	91 05       	cpc	r25, r1
+ 2b6:	51 f7       	brne	.-44     	; 0x28c <clock_byte+0x1a>
+            cbi(PORTC, SR_DATA);
+    
+        sbi(PORTC, SR_SCK);
+    }
+        
+	sbi(PORTC, SR_EN); //Disable outputs
+ 2b8:	44 9a       	sbi	0x08, 4	; 8
+
+    cbi(PORTC, SR_LATCH); 
+ 2ba:	42 98       	cbi	0x08, 2	; 8
+	delay_short(HOLD_TIME);
+ 2bc:	81 e0       	ldi	r24, 0x01	; 1
+ 2be:	90 e0       	ldi	r25, 0x00	; 0
+ 2c0:	0e 94 2f 01 	call	0x25e	; 0x25e <delay_short>
+    sbi(PORTC, SR_LATCH); //Latch the current data clocked into registers
+ 2c4:	42 9a       	sbi	0x08, 2	; 8
+ 
+	//Turn on LED's of the current row
+    PORTD &= 0xF0;		//Make sure we keep the high bytes of PortD(Button Values)
+ 2c6:	8b b1       	in	r24, 0x0b	; 11
+ 2c8:	80 7f       	andi	r24, 0xF0	; 240
+ 2ca:	8b b9       	out	0x0b, r24	; 11
+    PORTD |= (1 << rowNum);	//Put the rowNum on the Port D pins
+ 2cc:	3b 81       	ldd	r19, Y+3	; 0x03
+ 2ce:	2b b1       	in	r18, 0x0b	; 11
+ 2d0:	81 e0       	ldi	r24, 0x01	; 1
+ 2d2:	90 e0       	ldi	r25, 0x00	; 0
+ 2d4:	01 c0       	rjmp	.+2      	; 0x2d8 <clock_byte+0x66>
+ 2d6:	88 0f       	add	r24, r24
+ 2d8:	3a 95       	dec	r19
+ 2da:	ea f7       	brpl	.-6      	; 0x2d6 <clock_byte+0x64>
+ 2dc:	82 2b       	or	r24, r18
+ 2de:	8b b9       	out	0x0b, r24	; 11
+    cbi(PORTC, SR_EN); //Enable outputs
+ 2e0:	44 98       	cbi	0x08, 4	; 8
+}    
+ 2e2:	0f 90       	pop	r0
+ 2e4:	0f 90       	pop	r0
+ 2e6:	0f 90       	pop	r0
+ 2e8:	df 91       	pop	r29
+ 2ea:	cf 91       	pop	r28
+ 2ec:	08 95       	ret
+
+000002ee <newcolor>:
+  }
+}
+
+//Generates a "random" new color for the input color arrays
+void newcolor(uint8_t * r, uint8_t * g, uint8_t * b)
+{
+ 2ee:	cf 93       	push	r28
+ 2f0:	df 93       	push	r29
+ 2f2:	dc 01       	movw	r26, r24
+
+  uint16_t k = *r | (*g << 3) | (*b << 6);
+ 2f4:	8c 91       	ld	r24, X
+ 2f6:	eb 01       	movw	r28, r22
+ 2f8:	28 81       	ld	r18, Y
+ 2fa:	d8 e0       	ldi	r29, 0x08	; 8
+ 2fc:	2d 9f       	mul	r18, r29
+ 2fe:	90 01       	movw	r18, r0
+ 300:	11 24       	eor	r1, r1
+ 302:	28 2b       	or	r18, r24
+ 304:	ea 01       	movw	r28, r20
+ 306:	e8 81       	ld	r30, Y
+ 308:	d0 e4       	ldi	r29, 0x40	; 64
+ 30a:	ed 9f       	mul	r30, r29
+ 30c:	f0 01       	movw	r30, r0
+ 30e:	11 24       	eor	r1, r1
+ 310:	2e 2b       	or	r18, r30
+ 312:	3f 2b       	or	r19, r31
+  uint8_t i,j;
+  
+  i = k&0xff;
+ 314:	92 2f       	mov	r25, r18
+  j = k >> 8;
+ 316:	83 2f       	mov	r24, r19
+  while((i*j)==0)
+ 318:	98 9f       	mul	r25, r24
+ 31a:	90 01       	movw	r18, r0
+ 31c:	11 24       	eor	r1, r1
+ 31e:	21 15       	cp	r18, r1
+ 320:	31 05       	cpc	r19, r1
+ 322:	21 f4       	brne	.+8      	; 0x32c <newcolor+0x3e>
+  {
+    i=i+j+1;
+ 324:	98 0f       	add	r25, r24
+ 326:	9f 5f       	subi	r25, 0xFF	; 255
+    j=j+3;
+ 328:	8d 5f       	subi	r24, 0xFD	; 253
+ 32a:	f6 cf       	rjmp	.-20     	; 0x318 <newcolor+0x2a>
+  }
+  k=i*j;
+  *r=k&7;
+ 32c:	82 2f       	mov	r24, r18
+ 32e:	87 70       	andi	r24, 0x07	; 7
+ 330:	8c 93       	st	X, r24
+  *g=(k>>3)&7;
+ 332:	c9 01       	movw	r24, r18
+ 334:	e3 e0       	ldi	r30, 0x03	; 3
+ 336:	96 95       	lsr	r25
+ 338:	87 95       	ror	r24
+ 33a:	ea 95       	dec	r30
+ 33c:	e1 f7       	brne	.-8      	; 0x336 <newcolor+0x48>
+ 33e:	87 70       	andi	r24, 0x07	; 7
+ 340:	fb 01       	movw	r30, r22
+ 342:	80 83       	st	Z, r24
+  *b=(k>>6)&7;
+ 344:	f6 e0       	ldi	r31, 0x06	; 6
+ 346:	36 95       	lsr	r19
+ 348:	27 95       	ror	r18
+ 34a:	fa 95       	dec	r31
+ 34c:	e1 f7       	brne	.-8      	; 0x346 <newcolor+0x58>
+ 34e:	27 70       	andi	r18, 0x07	; 7
+ 350:	ea 01       	movw	r28, r20
+ 352:	28 83       	st	Y, r18
+}
+ 354:	df 91       	pop	r29
+ 356:	cf 91       	pop	r28
+ 358:	08 95       	ret
+
+0000035a <display>:
+
+//Combines the three color frames to determine the color for each row. Also 
+//determines the button status of the board
+void display(void){
+ 35a:	cf 93       	push	r28
+ 35c:	df 93       	push	r29
+    uint16_t lineByte=0; //byte that carries this line's LED info
+    uint8_t row_offset,LED, buttonRow;
+
+    row = (row + 1) & 3; //Only 4 rows
+ 35e:	80 91 12 01 	lds	r24, 0x0112
+ 362:	8f 5f       	subi	r24, 0xFF	; 255
+ 364:	83 70       	andi	r24, 0x03	; 3
+ 366:	80 93 12 01 	sts	0x0112, r24
+    if(row == 0) frame_num = (frame_num + 1) & (COLOR_DEPTH); //Limits frame count to COLOR_DEPTH frames
+ 36a:	80 91 12 01 	lds	r24, 0x0112
+ 36e:	81 11       	cpse	r24, r1
+ 370:	0b c0       	rjmp	.+22     	; 0x388 <display+0x2e>
+ 372:	80 91 10 01 	lds	r24, 0x0110
+ 376:	90 91 11 01 	lds	r25, 0x0111
+ 37a:	01 96       	adiw	r24, 0x01	; 1
+ 37c:	87 70       	andi	r24, 0x07	; 7
+ 37e:	99 27       	eor	r25, r25
+ 380:	90 93 11 01 	sts	0x0111, r25
+ 384:	80 93 10 01 	sts	0x0110, r24
+
+    row_offset = row << 2;
+ 388:	60 91 12 01 	lds	r22, 0x0112
+ 38c:	66 0f       	add	r22, r22
+ 38e:	66 0f       	add	r22, r22
+ 390:	c0 e0       	ldi	r28, 0x00	; 0
+ 392:	d0 e0       	ldi	r29, 0x00	; 0
+}
+
+//Combines the three color frames to determine the color for each row. Also 
+//determines the button status of the board
+void display(void){
+    uint16_t lineByte=0; //byte that carries this line's LED info
+ 394:	80 e0       	ldi	r24, 0x00	; 0
+ 396:	90 e0       	ldi	r25, 0x00	; 0
+
+    for (char column = 0; column < 4; column++) //Only 4 columns
+    {
+        LED = column + row_offset;
+		
+		if(column != row)lineByte |= (1<<column);
+ 398:	41 e0       	ldi	r20, 0x01	; 1
+ 39a:	50 e0       	ldi	r21, 0x00	; 0
+ 39c:	2c 2f       	mov	r18, r28
+ 39e:	26 0f       	add	r18, r22
+ 3a0:	30 91 12 01 	lds	r19, 0x0112
+ 3a4:	3c 17       	cp	r19, r28
+ 3a6:	49 f0       	breq	.+18     	; 0x3ba <display+0x60>
+ 3a8:	fa 01       	movw	r30, r20
+ 3aa:	0c 2e       	mov	r0, r28
+ 3ac:	02 c0       	rjmp	.+4      	; 0x3b2 <display+0x58>
+ 3ae:	ee 0f       	add	r30, r30
+ 3b0:	ff 1f       	adc	r31, r31
+ 3b2:	0a 94       	dec	r0
+ 3b4:	e2 f7       	brpl	.-8      	; 0x3ae <display+0x54>
+ 3b6:	8e 2b       	or	r24, r30
+ 3b8:	9f 2b       	or	r25, r31
+        if(greenf[LED] > frame_num) lineByte |= (1 << (column + GREEN_POS));
+ 3ba:	30 e0       	ldi	r19, 0x00	; 0
+ 3bc:	a0 91 10 01 	lds	r26, 0x0110
+ 3c0:	b0 91 11 01 	lds	r27, 0x0111
+ 3c4:	f9 01       	movw	r30, r18
+ 3c6:	ed 5b       	subi	r30, 0xBD	; 189
+ 3c8:	fe 4f       	sbci	r31, 0xFE	; 254
+ 3ca:	e0 81       	ld	r30, Z
+ 3cc:	f0 e0       	ldi	r31, 0x00	; 0
+ 3ce:	ae 17       	cp	r26, r30
+ 3d0:	bf 07       	cpc	r27, r31
+ 3d2:	54 f4       	brge	.+20     	; 0x3e8 <display+0x8e>
+ 3d4:	fe 01       	movw	r30, r28
+ 3d6:	34 96       	adiw	r30, 0x04	; 4
+ 3d8:	da 01       	movw	r26, r20
+ 3da:	02 c0       	rjmp	.+4      	; 0x3e0 <display+0x86>
+ 3dc:	aa 0f       	add	r26, r26
+ 3de:	bb 1f       	adc	r27, r27
+ 3e0:	ea 95       	dec	r30
+ 3e2:	e2 f7       	brpl	.-8      	; 0x3dc <display+0x82>
+ 3e4:	8a 2b       	or	r24, r26
+ 3e6:	9b 2b       	or	r25, r27
+        if(bluef[LED] > frame_num) lineByte |= (1 << (column + BLUE_POS));
+ 3e8:	a0 91 10 01 	lds	r26, 0x0110
+ 3ec:	b0 91 11 01 	lds	r27, 0x0111
+ 3f0:	f9 01       	movw	r30, r18
+ 3f2:	ed 5e       	subi	r30, 0xED	; 237
+ 3f4:	fe 4f       	sbci	r31, 0xFE	; 254
+ 3f6:	e0 81       	ld	r30, Z
+ 3f8:	f0 e0       	ldi	r31, 0x00	; 0
+ 3fa:	ae 17       	cp	r26, r30
+ 3fc:	bf 07       	cpc	r27, r31
+ 3fe:	54 f4       	brge	.+20     	; 0x414 <display+0xba>
+ 400:	fe 01       	movw	r30, r28
+ 402:	38 96       	adiw	r30, 0x08	; 8
+ 404:	da 01       	movw	r26, r20
+ 406:	02 c0       	rjmp	.+4      	; 0x40c <display+0xb2>
+ 408:	aa 0f       	add	r26, r26
+ 40a:	bb 1f       	adc	r27, r27
+ 40c:	ea 95       	dec	r30
+ 40e:	e2 f7       	brpl	.-8      	; 0x408 <display+0xae>
+ 410:	8a 2b       	or	r24, r26
+ 412:	9b 2b       	or	r25, r27
+        if(redf[LED] > frame_num) lineByte |= (1 << (column + RED_POS));
+ 414:	e0 91 10 01 	lds	r30, 0x0110
+ 418:	f0 91 11 01 	lds	r31, 0x0111
+ 41c:	d9 01       	movw	r26, r18
+ 41e:	ad 5d       	subi	r26, 0xDD	; 221
+ 420:	be 4f       	sbci	r27, 0xFE	; 254
+ 422:	2c 91       	ld	r18, X
+ 424:	30 e0       	ldi	r19, 0x00	; 0
+ 426:	e2 17       	cp	r30, r18
+ 428:	f3 07       	cpc	r31, r19
+ 42a:	5c f4       	brge	.+22     	; 0x442 <display+0xe8>
+ 42c:	9e 01       	movw	r18, r28
+ 42e:	24 5f       	subi	r18, 0xF4	; 244
+ 430:	3f 4f       	sbci	r19, 0xFF	; 255
+ 432:	fa 01       	movw	r30, r20
+ 434:	02 c0       	rjmp	.+4      	; 0x43a <display+0xe0>
+ 436:	ee 0f       	add	r30, r30
+ 438:	ff 1f       	adc	r31, r31
+ 43a:	2a 95       	dec	r18
+ 43c:	e2 f7       	brpl	.-8      	; 0x436 <display+0xdc>
+ 43e:	8e 2b       	or	r24, r30
+ 440:	9f 2b       	or	r25, r31
+ 442:	21 96       	adiw	r28, 0x01	; 1
+    row = (row + 1) & 3; //Only 4 rows
+    if(row == 0) frame_num = (frame_num + 1) & (COLOR_DEPTH); //Limits frame count to COLOR_DEPTH frames
+
+    row_offset = row << 2;
+
+    for (char column = 0; column < 4; column++) //Only 4 columns
+ 444:	c4 30       	cpi	r28, 0x04	; 4
+ 446:	d1 05       	cpc	r29, r1
+ 448:	09 f0       	breq	.+2      	; 0x44c <display+0xf2>
+ 44a:	a8 cf       	rjmp	.-176    	; 0x39c <display+0x42>
+        if(bluef[LED] > frame_num) lineByte |= (1 << (column + BLUE_POS));
+        if(redf[LED] > frame_num) lineByte |= (1 << (column + RED_POS));
+    }
+
+    //Output the current RGB values to this row
+	clock_byte(lineByte, row);
+ 44c:	60 91 12 01 	lds	r22, 0x0112
+ 450:	0e 94 39 01 	call	0x272	; 0x272 <clock_byte>
+	
+	//get the button values
+	buttonRow=PIND;	//Get the value of the buttons
+ 454:	49 b1       	in	r20, 0x09	; 9
+ 456:	20 e0       	ldi	r18, 0x00	; 0
+ 458:	30 e0       	ldi	r19, 0x00	; 0
+	for(int i=0; i<4; i++){
+		if(buttonRow & (1<<(i+4)))buttons[(i*4)+row]=NOT_PRESSED;
+ 45a:	50 e0       	ldi	r21, 0x00	; 0
+ 45c:	ef ef       	ldi	r30, 0xFF	; 255
+ 45e:	c9 01       	movw	r24, r18
+ 460:	8d 5c       	subi	r24, 0xCD	; 205
+ 462:	9e 4f       	sbci	r25, 0xFE	; 254
+ 464:	ba 01       	movw	r22, r20
+ 466:	0c 2e       	mov	r0, r28
+ 468:	02 c0       	rjmp	.+4      	; 0x46e <display+0x114>
+ 46a:	75 95       	asr	r23
+ 46c:	67 95       	ror	r22
+ 46e:	0a 94       	dec	r0
+ 470:	e2 f7       	brpl	.-8      	; 0x46a <display+0x110>
+ 472:	60 ff       	sbrs	r22, 0
+ 474:	07 c0       	rjmp	.+14     	; 0x484 <display+0x12a>
+ 476:	60 91 12 01 	lds	r22, 0x0112
+ 47a:	dc 01       	movw	r26, r24
+ 47c:	a6 0f       	add	r26, r22
+ 47e:	b1 1d       	adc	r27, r1
+ 480:	ec 93       	st	X, r30
+ 482:	06 c0       	rjmp	.+12     	; 0x490 <display+0x136>
+		else buttons[(i*4)+row]=PRESSED;
+ 484:	60 91 12 01 	lds	r22, 0x0112
+ 488:	dc 01       	movw	r26, r24
+ 48a:	a6 0f       	add	r26, r22
+ 48c:	b1 1d       	adc	r27, r1
+ 48e:	1c 92       	st	X, r1
+ 490:	21 96       	adiw	r28, 0x01	; 1
+ 492:	2c 5f       	subi	r18, 0xFC	; 252
+ 494:	3f 4f       	sbci	r19, 0xFF	; 255
+    //Output the current RGB values to this row
+	clock_byte(lineByte, row);
+	
+	//get the button values
+	buttonRow=PIND;	//Get the value of the buttons
+	for(int i=0; i<4; i++){
+ 496:	20 31       	cpi	r18, 0x10	; 16
+ 498:	31 05       	cpc	r19, r1
+ 49a:	09 f7       	brne	.-62     	; 0x45e <display+0x104>
+		if(buttonRow & (1<<(i+4)))buttons[(i*4)+row]=NOT_PRESSED;
+		else buttons[(i*4)+row]=PRESSED;
+	}
+}
+ 49c:	df 91       	pop	r29
+ 49e:	cf 91       	pop	r28
+ 4a0:	08 95       	ret
+
+000004a2 <write_to_EEPROM>:
+//Usage: write_to_EEPROM(0, 'A');
+void write_to_EEPROM(unsigned int Address, unsigned char Data)
+{
+    //Interrupts are globally disabled!
+	
+	while(EECR & (1<<EEPE)); //Wait for last Write to complete
+ 4a2:	f9 99       	sbic	0x1f, 1	; 31
+ 4a4:	fe cf       	rjmp	.-4      	; 0x4a2 <write_to_EEPROM>
+	//May need to wait for Flash to complete also!
+	EEAR = Address;			//Assign the Address Register with "Address"
+ 4a6:	92 bd       	out	0x22, r25	; 34
+ 4a8:	81 bd       	out	0x21, r24	; 33
+	EEDR=Data;				//Put "Data" in the Data Register
+ 4aa:	60 bd       	out	0x20, r22	; 32
+	EECR |= (1<<EEMPE); 	//Write to Master Write Enable
+ 4ac:	fa 9a       	sbi	0x1f, 2	; 31
+	EECR |= (1<<EEPE);  	//Start Write by setting EE Write Enable
+ 4ae:	f9 9a       	sbi	0x1f, 1	; 31
+ 4b0:	08 95       	ret
+
+000004b2 <read_from_EEPROM>:
+//		Data=read_from_EEPROM(0);
+unsigned char read_from_EEPROM(unsigned int Address)
+{
+	//Interrupts are globally disabled!
+	
+	while(EECR & (1<<EEPE));	//Wait for last Write to complete
+ 4b2:	f9 99       	sbic	0x1f, 1	; 31
+ 4b4:	fe cf       	rjmp	.-4      	; 0x4b2 <read_from_EEPROM>
+	EEAR = Address;				//Assign the Address Register with "Address"
+ 4b6:	92 bd       	out	0x22, r25	; 34
+ 4b8:	81 bd       	out	0x21, r24	; 33
+	EECR |= (1<<EERE); 			//Start Read by writing to EER
+ 4ba:	f8 9a       	sbi	0x1f, 0	; 31
+	return EEDR;				//EEPROM Data is returned
+ 4bc:	80 b5       	in	r24, 0x20	; 32
+}
+ 4be:	08 95       	ret
+
+000004c0 <ioinit>:
+//Initializes the I/O pins of the ATmega168.
+//Initializes the Shift Register
+//Sets up the Interrupt
+//Initalizes the System Parameters for this board
+void ioinit (void)
+{
+ 4c0:	cf 93       	push	r28
+
+    //1 = output, 0 = input
+	DDRB |= (1<<SPI_OUT);	//Port B OUtputs
+ 4c2:	23 9a       	sbi	0x04, 3	; 4
+	DDRB &= ~((1<<SPI_IN) | (1<<SPI_SCLK) | (1<<SPI_CS)); //Port B Inputs
+ 4c4:	84 b1       	in	r24, 0x04	; 4
+ 4c6:	8b 7c       	andi	r24, 0xCB	; 203
+ 4c8:	84 b9       	out	0x04, r24	; 4
+	PORTB |= ((1<<SPI_IN) | (1<<SPI_SCLK) | (1<<SPI_CS));	//Use Pull-Ups
+ 4ca:	85 b1       	in	r24, 0x05	; 5
+ 4cc:	84 63       	ori	r24, 0x34	; 52
+ 4ce:	85 b9       	out	0x05, r24	; 5
+	SPCR=0;
+ 4d0:	1c bc       	out	0x2c, r1	; 44
+			
+    DDRC = 0xFF; //Shift Register Outputs
+ 4d2:	8f ef       	ldi	r24, 0xFF	; 255
+ 4d4:	87 b9       	out	0x07, r24	; 7
+    
+	DDRD = 0x0F; //Bits 0-3: LED Cathode for rows; Bits 4-7: Button Inputs
+ 4d6:	8f e0       	ldi	r24, 0x0F	; 15
+ 4d8:	8a b9       	out	0x0a, r24	; 10
+	PORTD = 0xF0;	//Enable pull-ups on button inputs
+ 4da:	80 ef       	ldi	r24, 0xF0	; 240
+ 4dc:	8b b9       	out	0x0b, r24	; 11
+    
+    cbi(PORTC, SR_CLEAR); //Clear current registers
+ 4de:	43 98       	cbi	0x08, 3	; 8
+    delay_short(HOLD_TIME);
+ 4e0:	81 e0       	ldi	r24, 0x01	; 1
+ 4e2:	90 e0       	ldi	r25, 0x00	; 0
+ 4e4:	0e 94 2f 01 	call	0x25e	; 0x25e <delay_short>
+    sbi(PORTC, SR_CLEAR);
+ 4e8:	43 9a       	sbi	0x08, 3	; 8
+	
+	//Setup Interrupts to be generated on SPI_SCK Pin Change
+	PCICR = (1<<0);	//Enable Pin Change Interrupts on PCINT0
+ 4ea:	c1 e0       	ldi	r28, 0x01	; 1
+ 4ec:	c0 93 68 00 	sts	0x0068, r28
+	PCMSK0 = (1<<SPI_SCLK);	//Enable PC interrupts on the SPI_SCK pin
+ 4f0:	80 e2       	ldi	r24, 0x20	; 32
+ 4f2:	80 93 6b 00 	sts	0x006B, r24
+	
+	//Load the number of boards from EEPROM
+	NUMBER_OF_BOARDS = read_from_EEPROM(NUMBER_OF_BOARDS_ADDRESS);
+ 4f6:	80 e0       	ldi	r24, 0x00	; 0
+ 4f8:	90 e0       	ldi	r25, 0x00	; 0
+ 4fa:	0e 94 59 02 	call	0x4b2	; 0x4b2 <read_from_EEPROM>
+	if(NUMBER_OF_BOARDS == 0 || NUMBER_OF_BOARDS > 16){
+ 4fe:	9f ef       	ldi	r25, 0xFF	; 255
+ 500:	98 0f       	add	r25, r24
+ 502:	90 31       	cpi	r25, 0x10	; 16
+ 504:	18 f4       	brcc	.+6      	; 0x50c <__stack+0xd>
+	//Setup Interrupts to be generated on SPI_SCK Pin Change
+	PCICR = (1<<0);	//Enable Pin Change Interrupts on PCINT0
+	PCMSK0 = (1<<SPI_SCLK);	//Enable PC interrupts on the SPI_SCK pin
+	
+	//Load the number of boards from EEPROM
+	NUMBER_OF_BOARDS = read_from_EEPROM(NUMBER_OF_BOARDS_ADDRESS);
+ 506:	80 93 00 01 	sts	0x0100, r24
+ 50a:	07 c0       	rjmp	.+14     	; 0x51a <__stack+0x1b>
+	if(NUMBER_OF_BOARDS == 0 || NUMBER_OF_BOARDS > 16){
+		NUMBER_OF_BOARDS=1;
+ 50c:	c0 93 00 01 	sts	0x0100, r28
+		write_to_EEPROM(NUMBER_OF_BOARDS_ADDRESS, NUMBER_OF_BOARDS);
+ 510:	61 e0       	ldi	r22, 0x01	; 1
+ 512:	80 e0       	ldi	r24, 0x00	; 0
+ 514:	90 e0       	ldi	r25, 0x00	; 0
+ 516:	0e 94 51 02 	call	0x4a2	; 0x4a2 <write_to_EEPROM>
+	}	
+	sei();
+ 51a:	78 94       	sei
+	
+    row = 0;
+ 51c:	10 92 12 01 	sts	0x0112, r1
+}
+ 520:	cf 91       	pop	r28
+ 522:	08 95       	ret
+
+00000524 <main>:
+
+int main (void)
+{
+	int count=0;
+
+	ioinit (); //Boot up defaults
+ 524:	0e 94 60 02 	call	0x4c0	; 0x4c0 <ioinit>
+	
+	//Startup Sequence
+	fill16(redf, 0xff);
+ 528:	6f ef       	ldi	r22, 0xFF	; 255
+ 52a:	83 e2       	ldi	r24, 0x23	; 35
+ 52c:	91 e0       	ldi	r25, 0x01	; 1
+ 52e:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(greenf, 0x00);
+ 532:	60 e0       	ldi	r22, 0x00	; 0
+ 534:	83 e4       	ldi	r24, 0x43	; 67
+ 536:	91 e0       	ldi	r25, 0x01	; 1
+ 538:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(bluef, 0x00);
+ 53c:	60 e0       	ldi	r22, 0x00	; 0
+ 53e:	83 e1       	ldi	r24, 0x13	; 19
+ 540:	91 e0       	ldi	r25, 0x01	; 1
+ 542:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+ 546:	c8 eb       	ldi	r28, 0xB8	; 184
+ 548:	db e0       	ldi	r29, 0x0B	; 11
+	while(count<3000){
+		display();
+ 54a:	0e 94 ad 01 	call	0x35a	; 0x35a <display>
+ 54e:	21 97       	sbiw	r28, 0x01	; 1
+	
+	//Startup Sequence
+	fill16(redf, 0xff);
+	fill16(greenf, 0x00);
+	fill16(bluef, 0x00);
+	while(count<3000){
+ 550:	e1 f7       	brne	.-8      	; 0x54a <main+0x26>
+		display();
+		count++;
+	}
+	count=0;
+	fill16(redf, 0x00);
+ 552:	60 e0       	ldi	r22, 0x00	; 0
+ 554:	83 e2       	ldi	r24, 0x23	; 35
+ 556:	91 e0       	ldi	r25, 0x01	; 1
+ 558:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(greenf, 0xff);
+ 55c:	6f ef       	ldi	r22, 0xFF	; 255
+ 55e:	83 e4       	ldi	r24, 0x43	; 67
+ 560:	91 e0       	ldi	r25, 0x01	; 1
+ 562:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(bluef, 0x00);
+ 566:	60 e0       	ldi	r22, 0x00	; 0
+ 568:	83 e1       	ldi	r24, 0x13	; 19
+ 56a:	91 e0       	ldi	r25, 0x01	; 1
+ 56c:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+ 570:	c8 eb       	ldi	r28, 0xB8	; 184
+ 572:	db e0       	ldi	r29, 0x0B	; 11
+	while(count<3000){
+		display();
+ 574:	0e 94 ad 01 	call	0x35a	; 0x35a <display>
+ 578:	21 97       	sbiw	r28, 0x01	; 1
+	}
+	count=0;
+	fill16(redf, 0x00);
+	fill16(greenf, 0xff);
+	fill16(bluef, 0x00);
+	while(count<3000){
+ 57a:	e1 f7       	brne	.-8      	; 0x574 <main+0x50>
+		display();
+		count++;
+	}
+	count=0;
+	fill16(redf, 0x00);
+ 57c:	60 e0       	ldi	r22, 0x00	; 0
+ 57e:	83 e2       	ldi	r24, 0x23	; 35
+ 580:	91 e0       	ldi	r25, 0x01	; 1
+ 582:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(greenf, 0x00);
+ 586:	60 e0       	ldi	r22, 0x00	; 0
+ 588:	83 e4       	ldi	r24, 0x43	; 67
+ 58a:	91 e0       	ldi	r25, 0x01	; 1
+ 58c:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(bluef, 0xff);
+ 590:	6f ef       	ldi	r22, 0xFF	; 255
+ 592:	83 e1       	ldi	r24, 0x13	; 19
+ 594:	91 e0       	ldi	r25, 0x01	; 1
+ 596:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+ 59a:	c8 eb       	ldi	r28, 0xB8	; 184
+ 59c:	db e0       	ldi	r29, 0x0B	; 11
+	while(count<3000){
+		display();
+ 59e:	0e 94 ad 01 	call	0x35a	; 0x35a <display>
+ 5a2:	21 97       	sbiw	r28, 0x01	; 1
+	}
+	count=0;
+	fill16(redf, 0x00);
+	fill16(greenf, 0x00);
+	fill16(bluef, 0xff);
+	while(count<3000){
+ 5a4:	e1 f7       	brne	.-8      	; 0x59e <main+0x7a>
+		display();
+		count++;
+	}
+	fill16(redf, 0x00);
+ 5a6:	60 e0       	ldi	r22, 0x00	; 0
+ 5a8:	83 e2       	ldi	r24, 0x23	; 35
+ 5aa:	91 e0       	ldi	r25, 0x01	; 1
+ 5ac:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(greenf, 0x00);
+ 5b0:	60 e0       	ldi	r22, 0x00	; 0
+ 5b2:	83 e4       	ldi	r24, 0x43	; 67
+ 5b4:	91 e0       	ldi	r25, 0x01	; 1
+ 5b6:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	fill16(bluef, 0x00);
+ 5ba:	60 e0       	ldi	r22, 0x00	; 0
+ 5bc:	83 e1       	ldi	r24, 0x13	; 19
+ 5be:	91 e0       	ldi	r25, 0x01	; 1
+ 5c0:	0e 94 23 01 	call	0x246	; 0x246 <fill16>
+	redf[NUMBER_OF_BOARDS-1]=0xff;
+ 5c4:	80 91 00 01 	lds	r24, 0x0100
+ 5c8:	90 e0       	ldi	r25, 0x00	; 0
+ 5ca:	01 97       	sbiw	r24, 0x01	; 1
+ 5cc:	fc 01       	movw	r30, r24
+ 5ce:	ed 5d       	subi	r30, 0xDD	; 221
+ 5d0:	fe 4f       	sbci	r31, 0xFE	; 254
+ 5d2:	2f ef       	ldi	r18, 0xFF	; 255
+ 5d4:	20 83       	st	Z, r18
+	greenf[NUMBER_OF_BOARDS-1]=0xff;
+ 5d6:	fc 01       	movw	r30, r24
+ 5d8:	ed 5b       	subi	r30, 0xBD	; 189
+ 5da:	fe 4f       	sbci	r31, 0xFE	; 254
+ 5dc:	20 83       	st	Z, r18
+	bluef[NUMBER_OF_BOARDS-1]=0xff;
+ 5de:	fc 01       	movw	r30, r24
+ 5e0:	ed 5e       	subi	r30, 0xED	; 237
+ 5e2:	fe 4f       	sbci	r31, 0xFE	; 254
+ 5e4:	20 83       	st	Z, r18
+			//Get the command id from the SPI bus
+			for(int id_bit=0; id_bit<8; id_bit++){
+				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+				
+				if(PINB & (1<<SPI_IN))command_id |= (1<<id_bit);
+				else command_id &= ~(1<<id_bit);
+ 5e6:	c1 e0       	ldi	r28, 0x01	; 1
+ 5e8:	d0 e0       	ldi	r29, 0x00	; 0
+	bluef[NUMBER_OF_BOARDS-1]=0xff;
+	
+	while(1)
+	{
+		//Keep displaying until we get a new board image
+		while(!board_complete && (enter_command_mode!=2)){
+ 5ea:	80 91 08 01 	lds	r24, 0x0108
+ 5ee:	90 91 09 01 	lds	r25, 0x0109
+ 5f2:	89 2b       	or	r24, r25
+ 5f4:	69 f5       	brne	.+90     	; 0x650 <main+0x12c>
+ 5f6:	80 91 02 01 	lds	r24, 0x0102
+ 5fa:	90 91 03 01 	lds	r25, 0x0103
+ 5fe:	02 97       	sbiw	r24, 0x02	; 2
+ 600:	39 f1       	breq	.+78     	; 0x650 <main+0x12c>
+			display();
+ 602:	0e 94 ad 01 	call	0x35a	; 0x35a <display>
+			if(boards_received==0)for(int i=0; i<NUMBER_OF_LEDS; i++)outgoing_board[i+48]=buttons[i];
+ 606:	80 91 0c 01 	lds	r24, 0x010C
+ 60a:	90 91 0d 01 	lds	r25, 0x010D
+ 60e:	89 2b       	or	r24, r25
+ 610:	a1 f0       	breq	.+40     	; 0x63a <main+0x116>
+			
+			//If we've received a CS pulse, then we should reset the frame indices
+			if(!(PINB & (1<<SPI_CS))){
+ 612:	1a 99       	sbic	0x03, 2	; 3
+ 614:	ea cf       	rjmp	.-44     	; 0x5ea <main+0xc6>
+				cli();
+ 616:	f8 94       	cli
+				bit_count_input=0;
+ 618:	10 92 07 01 	sts	0x0107, r1
+ 61c:	10 92 06 01 	sts	0x0106, r1
+				bit_count_output=0;
+ 620:	10 92 05 01 	sts	0x0105, r1
+ 624:	10 92 04 01 	sts	0x0104, r1
+				incoming_board_index=0;
+ 628:	10 92 0f 01 	sts	0x010F, r1
+ 62c:	10 92 0e 01 	sts	0x010E, r1
+				outgoing_board_index=0;
+ 630:	10 92 0b 01 	sts	0x010B, r1
+ 634:	10 92 0a 01 	sts	0x010A, r1
+ 638:	57 c0       	rjmp	.+174    	; 0x6e8 <main+0x1c4>
+ 63a:	e3 e3       	ldi	r30, 0x33	; 51
+ 63c:	f1 e0       	ldi	r31, 0x01	; 1
+ 63e:	a4 ec       	ldi	r26, 0xC4	; 196
+ 640:	b1 e0       	ldi	r27, 0x01	; 1
+	while(1)
+	{
+		//Keep displaying until we get a new board image
+		while(!board_complete && (enter_command_mode!=2)){
+			display();
+			if(boards_received==0)for(int i=0; i<NUMBER_OF_LEDS; i++)outgoing_board[i+48]=buttons[i];
+ 642:	81 91       	ld	r24, Z+
+ 644:	8d 93       	st	X+, r24
+ 646:	81 e0       	ldi	r24, 0x01	; 1
+ 648:	e3 34       	cpi	r30, 0x43	; 67
+ 64a:	f8 07       	cpc	r31, r24
+ 64c:	d1 f7       	brne	.-12     	; 0x642 <main+0x11e>
+ 64e:	e1 cf       	rjmp	.-62     	; 0x612 <main+0xee>
+				incoming_board_index=0;
+				outgoing_board_index=0;
+				sei();
+			}
+		}
+		cli();
+ 650:	f8 94       	cli
+		if(board_complete){	
+ 652:	80 91 08 01 	lds	r24, 0x0108
+ 656:	90 91 09 01 	lds	r25, 0x0109
+ 65a:	89 2b       	or	r24, r25
+ 65c:	09 f0       	breq	.+2      	; 0x660 <main+0x13c>
+ 65e:	46 c0       	rjmp	.+140    	; 0x6ec <main+0x1c8>
+			}
+			//If we haven't received a complete data set, then send the data on to the next board
+			else for(int i=0; i<NUMBER_OF_LEDS*4; i++)outgoing_board[i]=incoming_board[i];
+		}
+		
+		if(enter_command_mode==2){			
+ 660:	80 91 02 01 	lds	r24, 0x0102
+ 664:	90 91 03 01 	lds	r25, 0x0103
+ 668:	02 97       	sbiw	r24, 0x02	; 2
+ 66a:	91 f5       	brne	.+100    	; 0x6d0 <main+0x1ac>
+ 66c:	80 e0       	ldi	r24, 0x00	; 0
+ 66e:	90 e0       	ldi	r25, 0x00	; 0
+			//Get the command id from the SPI bus
+			for(int id_bit=0; id_bit<8; id_bit++){
+				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+ 670:	1d 9b       	sbis	0x03, 5	; 3
+ 672:	fe cf       	rjmp	.-4      	; 0x670 <main+0x14c>
+ 674:	60 91 93 01 	lds	r22, 0x0193
+				
+				if(PINB & (1<<SPI_IN))command_id |= (1<<id_bit);
+ 678:	1c 9b       	sbis	0x03, 4	; 3
+ 67a:	7b c0       	rjmp	.+246    	; 0x772 <main+0x24e>
+ 67c:	ae 01       	movw	r20, r28
+ 67e:	08 2e       	mov	r0, r24
+ 680:	01 c0       	rjmp	.+2      	; 0x684 <main+0x160>
+ 682:	44 0f       	add	r20, r20
+ 684:	0a 94       	dec	r0
+ 686:	ea f7       	brpl	.-6      	; 0x682 <main+0x15e>
+ 688:	46 2b       	or	r20, r22
+ 68a:	40 93 93 01 	sts	0x0193, r20
+				else command_id &= ~(1<<id_bit);
+				
+				while(PINB & (1<<SPI_SCLK));	//Wait for the SPI clock to go low before getting next bit.
+ 68e:	1d 99       	sbic	0x03, 5	; 3
+ 690:	fe cf       	rjmp	.-4      	; 0x68e <main+0x16a>
+			else for(int i=0; i<NUMBER_OF_LEDS*4; i++)outgoing_board[i]=incoming_board[i];
+		}
+		
+		if(enter_command_mode==2){			
+			//Get the command id from the SPI bus
+			for(int id_bit=0; id_bit<8; id_bit++){
+ 692:	01 96       	adiw	r24, 0x01	; 1
+ 694:	88 30       	cpi	r24, 0x08	; 8
+ 696:	91 05       	cpc	r25, r1
+ 698:	59 f7       	brne	.-42     	; 0x670 <main+0x14c>
+ 69a:	80 e0       	ldi	r24, 0x00	; 0
+ 69c:	90 e0       	ldi	r25, 0x00	; 0
+				while(PINB & (1<<SPI_SCLK));	//Wait for the SPI clock to go low before getting next bit.
+			}
+			
+			//Get the command byte from the SPI bus
+			for(int data_bit=0; data_bit<8; data_bit++){
+				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+ 69e:	1d 9b       	sbis	0x03, 5	; 3
+ 6a0:	fe cf       	rjmp	.-4      	; 0x69e <main+0x17a>
+ 6a2:	60 91 d4 01 	lds	r22, 0x01D4
+				
+				if(PINB & (1<<SPI_IN))command_byte |= (1<<data_bit);
+ 6a6:	1c 9b       	sbis	0x03, 4	; 3
+ 6a8:	6f c0       	rjmp	.+222    	; 0x788 <main+0x264>
+ 6aa:	ae 01       	movw	r20, r28
+ 6ac:	08 2e       	mov	r0, r24
+ 6ae:	01 c0       	rjmp	.+2      	; 0x6b2 <main+0x18e>
+ 6b0:	44 0f       	add	r20, r20
+ 6b2:	0a 94       	dec	r0
+ 6b4:	ea f7       	brpl	.-6      	; 0x6b0 <main+0x18c>
+ 6b6:	46 2b       	or	r20, r22
+ 6b8:	40 93 d4 01 	sts	0x01D4, r20
+				else command_byte &= ~(1<<data_bit);
+				
+				while(PINB & (1<<SPI_SCLK));	//Wait for the SPI clock to go low before getting next bit.
+ 6bc:	1d 99       	sbic	0x03, 5	; 3
+ 6be:	fe cf       	rjmp	.-4      	; 0x6bc <main+0x198>
+				
+				while(PINB & (1<<SPI_SCLK));	//Wait for the SPI clock to go low before getting next bit.
+			}
+			
+			//Get the command byte from the SPI bus
+			for(int data_bit=0; data_bit<8; data_bit++){
+ 6c0:	01 96       	adiw	r24, 0x01	; 1
+ 6c2:	88 30       	cpi	r24, 0x08	; 8
+ 6c4:	91 05       	cpc	r25, r1
+ 6c6:	59 f7       	brne	.-42     	; 0x69e <main+0x17a>
+				if(PINB & (1<<SPI_IN))command_byte |= (1<<data_bit);
+				else command_byte &= ~(1<<data_bit);
+				
+				while(PINB & (1<<SPI_SCLK));	//Wait for the SPI clock to go low before getting next bit.
+			}
+			enter_command_mode=0;
+ 6c8:	10 92 03 01 	sts	0x0103, r1
+ 6cc:	10 92 02 01 	sts	0x0102, r1
+		}
+		//If we received a command, lets handle it!
+		if(command_id==CHANGE_NUM_BOARDS){
+ 6d0:	80 91 93 01 	lds	r24, 0x0193
+ 6d4:	81 30       	cpi	r24, 0x01	; 1
+ 6d6:	41 f4       	brne	.+16     	; 0x6e8 <main+0x1c4>
+			NUMBER_OF_BOARDS=command_byte;
+ 6d8:	60 91 d4 01 	lds	r22, 0x01D4
+ 6dc:	60 93 00 01 	sts	0x0100, r22
+			write_to_EEPROM(NUMBER_OF_BOARDS_ADDRESS, NUMBER_OF_BOARDS);
+ 6e0:	80 e0       	ldi	r24, 0x00	; 0
+ 6e2:	90 e0       	ldi	r25, 0x00	; 0
+ 6e4:	0e 94 51 02 	call	0x4a2	; 0x4a2 <write_to_EEPROM>
+				cli();
+				bit_count_input=0;
+				bit_count_output=0;
+				incoming_board_index=0;
+				outgoing_board_index=0;
+				sei();
+ 6e8:	78 94       	sei
+ 6ea:	7f cf       	rjmp	.-258    	; 0x5ea <main+0xc6>
+			}
+		}
+		cli();
+		if(board_complete){	
+			board_complete=0;
+ 6ec:	10 92 09 01 	sts	0x0109, r1
+ 6f0:	10 92 08 01 	sts	0x0108, r1
+			boards_received+=1;
+ 6f4:	80 91 0c 01 	lds	r24, 0x010C
+ 6f8:	90 91 0d 01 	lds	r25, 0x010D
+ 6fc:	01 96       	adiw	r24, 0x01	; 1
+ 6fe:	90 93 0d 01 	sts	0x010D, r25
+ 702:	80 93 0c 01 	sts	0x010C, r24
+			
+			//If we've received a complete data set then retrieve the new board color values
+			if(boards_received>=NUMBER_OF_BOARDS){
+ 706:	20 91 0c 01 	lds	r18, 0x010C
+ 70a:	30 91 0d 01 	lds	r19, 0x010D
+ 70e:	80 91 00 01 	lds	r24, 0x0100
+ 712:	90 e0       	ldi	r25, 0x00	; 0
+ 714:	e3 e5       	ldi	r30, 0x53	; 83
+ 716:	f1 e0       	ldi	r31, 0x01	; 1
+ 718:	28 17       	cp	r18, r24
+ 71a:	39 07       	cpc	r19, r25
+ 71c:	0c f1       	brlt	.+66     	; 0x760 <main+0x23c>
+ 71e:	a3 e2       	ldi	r26, 0x23	; 35
+ 720:	b1 e0       	ldi	r27, 0x01	; 1
+				for(int i=0; i<NUMBER_OF_LEDS; i++)redf[i]=incoming_board[i];
+ 722:	81 91       	ld	r24, Z+
+ 724:	8d 93       	st	X+, r24
+ 726:	81 e0       	ldi	r24, 0x01	; 1
+ 728:	e3 36       	cpi	r30, 0x63	; 99
+ 72a:	f8 07       	cpc	r31, r24
+ 72c:	d1 f7       	brne	.-12     	; 0x722 <main+0x1fe>
+ 72e:	a3 e6       	ldi	r26, 0x63	; 99
+ 730:	b1 e0       	ldi	r27, 0x01	; 1
+ 732:	e3 e4       	ldi	r30, 0x43	; 67
+ 734:	f1 e0       	ldi	r31, 0x01	; 1
+				for(int i=0; i<NUMBER_OF_LEDS; i++)greenf[i]=incoming_board[i+16];
+ 736:	8d 91       	ld	r24, X+
+ 738:	81 93       	st	Z+, r24
+ 73a:	81 e0       	ldi	r24, 0x01	; 1
+ 73c:	e3 35       	cpi	r30, 0x53	; 83
+ 73e:	f8 07       	cpc	r31, r24
+ 740:	d1 f7       	brne	.-12     	; 0x736 <main+0x212>
+ 742:	a3 e7       	ldi	r26, 0x73	; 115
+ 744:	b1 e0       	ldi	r27, 0x01	; 1
+ 746:	e3 e1       	ldi	r30, 0x13	; 19
+ 748:	f1 e0       	ldi	r31, 0x01	; 1
+				for(int i=0; i<NUMBER_OF_LEDS; i++)bluef[i]=incoming_board[i+32];
+ 74a:	8d 91       	ld	r24, X+
+ 74c:	81 93       	st	Z+, r24
+ 74e:	81 e0       	ldi	r24, 0x01	; 1
+ 750:	e3 32       	cpi	r30, 0x23	; 35
+ 752:	f8 07       	cpc	r31, r24
+ 754:	d1 f7       	brne	.-12     	; 0x74a <main+0x226>
+				boards_received=0;
+ 756:	10 92 0d 01 	sts	0x010D, r1
+ 75a:	10 92 0c 01 	sts	0x010C, r1
+ 75e:	80 cf       	rjmp	.-256    	; 0x660 <main+0x13c>
+ 760:	a4 e9       	ldi	r26, 0x94	; 148
+ 762:	b1 e0       	ldi	r27, 0x01	; 1
+			}
+			//If we haven't received a complete data set, then send the data on to the next board
+			else for(int i=0; i<NUMBER_OF_LEDS*4; i++)outgoing_board[i]=incoming_board[i];
+ 764:	81 91       	ld	r24, Z+
+ 766:	8d 93       	st	X+, r24
+ 768:	81 e0       	ldi	r24, 0x01	; 1
+ 76a:	e3 39       	cpi	r30, 0x93	; 147
+ 76c:	f8 07       	cpc	r31, r24
+ 76e:	d1 f7       	brne	.-12     	; 0x764 <main+0x240>
+ 770:	77 cf       	rjmp	.-274    	; 0x660 <main+0x13c>
+			//Get the command id from the SPI bus
+			for(int id_bit=0; id_bit<8; id_bit++){
+				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+				
+				if(PINB & (1<<SPI_IN))command_id |= (1<<id_bit);
+				else command_id &= ~(1<<id_bit);
+ 772:	9e 01       	movw	r18, r28
+ 774:	08 2e       	mov	r0, r24
+ 776:	01 c0       	rjmp	.+2      	; 0x77a <main+0x256>
+ 778:	22 0f       	add	r18, r18
+ 77a:	0a 94       	dec	r0
+ 77c:	ea f7       	brpl	.-6      	; 0x778 <main+0x254>
+ 77e:	20 95       	com	r18
+ 780:	26 23       	and	r18, r22
+ 782:	20 93 93 01 	sts	0x0193, r18
+ 786:	83 cf       	rjmp	.-250    	; 0x68e <main+0x16a>
+			//Get the command byte from the SPI bus
+			for(int data_bit=0; data_bit<8; data_bit++){
+				while((PINB & (1<<SPI_SCLK))!=(1<<SPI_SCLK));
+				
+				if(PINB & (1<<SPI_IN))command_byte |= (1<<data_bit);
+				else command_byte &= ~(1<<data_bit);
+ 788:	9e 01       	movw	r18, r28
+ 78a:	08 2e       	mov	r0, r24
+ 78c:	01 c0       	rjmp	.+2      	; 0x790 <main+0x26c>
+ 78e:	22 0f       	add	r18, r18
+ 790:	0a 94       	dec	r0
+ 792:	ea f7       	brpl	.-6      	; 0x78e <main+0x26a>
+ 794:	20 95       	com	r18
+ 796:	26 23       	and	r18, r22
+ 798:	20 93 d4 01 	sts	0x01D4, r18
+ 79c:	8f cf       	rjmp	.-226    	; 0x6bc <main+0x198>
+
+0000079e <_exit>:
+ 79e:	f8 94       	cli
+
+000007a0 <__stop_program>:
+ 7a0:	ff cf       	rjmp	.-2      	; 0x7a0 <__stop_program>
