@@ -31,6 +31,8 @@ const float FREQUENCIES[] {
 };
 const int NUM_FREQUENCIES = array_size(FREQUENCIES);
 
+const unsigned char MIDI_NOTE_ON = 144;
+const unsigned char MIDI_NOTE_OFF = 128;
 const int MIDIS[] {
 	22,
 	23,
@@ -101,16 +103,31 @@ int midi(int tone, int level)
 {
 	return MIDIS[tone] + level * 12;
 }
+void midiOn(unsigned char channel, unsigned char note, unsigned char velocity)
+{
+	Serial.write(MIDI_NOTE_OFF + channel;
+	Serial.write(note);
+	Serial.write(velocity);
+}
+void midiOff(unsigned char channel, unsigned char note, unsigned char velocity)
+{
+	Serial.write(MIDI_NOTE_OFF + channel;
+	Serial.write(note);
+	Serial.write(velocity);
+}
+void playNote(unsigned char note)
+{
+	midiOn(1, note, 100);
+}
 
 void setup()
 {
 	for(int i = 0; i < NUM_KEYS; i++)
 		pinMode(key(i), INPUT);
 
-	Serial.begin(9600);
+	Serial.begin(31250);
 }
 
-#include <iostream>
 void loop(float r)
 {
 	const float r = range();
@@ -122,21 +139,9 @@ void loop(float r)
 			int level = (int)clamp<float>(r * NUM_FREQUENCIES_STEPS * NUM_FREQS_PER_TONE, 0.f, NUM_FREQUENCIES_STEPS * NUM_FREQS_PER_TONE - 1);
 			int freq = midi(tone(i, level % NUM_FREQS_PER_TONE), level / NUM_FREQS_PER_TONE);
 			//printf("key: %d, tone: %d, level: %d, freq: %f\n", i, level % NUM_FREQS_PER_TONE, level / NUM_FREQS_PER_TONE, freq);
-			Serial.write((unsigned char)freq);
+			playNote((unsigned char)freq);
 		}
 	}
 
 	delayTime(200);
-}
-
-#include <cstdlib>
-int main(int argc, const char *argv[])
-{
-	for(int i = 1; i < argc; i++)
-	{
-		loop(atof(argv[i]));
-		printf("\n");
-	}
-
-	return 0;
 }
