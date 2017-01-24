@@ -6,6 +6,8 @@
   Bruno Schilling
   Maximilian Gertz
   Sven Erdem
+
+  Version 2.1
 */
 
 #define array_size(A) sizeof(A) / sizeof(A[0]);
@@ -105,6 +107,21 @@ int midi(int tone, int level)
 }
 void midiOn(unsigned char channel, unsigned char note, unsigned char velocity)
 {
+<<<<<<< HEAD
+	Serial.write(MIDI_NOTE_OFF + channel;
+	Serial.write(note);
+	Serial.write(velocity);
+}
+void midiOff(unsigned char channel, unsigned char note, unsigned char velocity)
+{
+	Serial.write(MIDI_NOTE_OFF + channel;
+	Serial.write(note);
+	Serial.write(velocity);
+}
+void playNote(unsigned char note)
+{
+	midiOn(1, note, 100);
+=======
   Serial.write(MIDI_NOTE_OFF + channel;
   Serial.write(note);
   Serial.write(velocity);
@@ -118,6 +135,7 @@ void midiOff(unsigned char channel, unsigned char note, unsigned char velocity)
 void playNote(unsigned char note)
 {
   midiOn(1, note, 100);
+>>>>>>> 0fe3dd36db4154e2d3cd2a18776be8e0ea03f5c9
 }
 
 void setup()
