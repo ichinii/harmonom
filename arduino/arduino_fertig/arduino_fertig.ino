@@ -114,13 +114,13 @@ int midi(int tone, int level)
 }
 void midiOn(unsigned char channel, unsigned char note, unsigned char velocity)
 {
-	Serial.write(MIDI_NOTE_OFF + channel;
+	Serial.write(MIDI_NOTE_OFF + channel);
 	Serial.write(note);
 	Serial.write(velocity);
 }
 void midiOff(unsigned char channel, unsigned char note, unsigned char velocity)
 {
-	Serial.write(MIDI_NOTE_OFF + channel;
+	Serial.write(MIDI_NOTE_OFF + channel);
 	Serial.write(note);
 	Serial.write(velocity);
 }

@@ -1,4 +1,4 @@
-#N canvas 0 85 924 819 10;
+#N canvas 0 89 924 819 10;
 #X obj 336 120 comport 9600;
 #X msg 368 71 devices;
 #X msg 126 49 open 0;
@@ -133,7 +133,6 @@
 #X msg 534 782 275;
 #X msg 605 782 187;
 #X obj 276 123 notein;
-#X connect 0 0 13 0;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
